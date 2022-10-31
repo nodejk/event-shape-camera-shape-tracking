@@ -1,0 +1,4 @@
+FROM ubuntu
+
+
+CMD ["python3", "/app/main.py"]

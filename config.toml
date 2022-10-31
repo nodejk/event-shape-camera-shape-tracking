@@ -1,0 +1,10 @@
+[training-session]
+batch-size = ''
+epochs = ''
+learning-rate = ''
+data-path = ''
+data-processor = ''
+data-transformer = ''
+model-name = ''
+restore-model = ''
+restore-model-path = ''
