@@ -12,10 +12,5 @@ jobs:
   test: Check if all the required functionality is implemented.
   runs-on: ubuntu-latest
   env:
-    AWS_ACCOUNT_ID: {{ secrets.AWS_ACCOUNT_ID }}
-    AWS_REGION_ID: {{ secrets.AWS_REGION_ID }}
-
-  
-
-
-
+    # SERVER_ACCOUNT_ID: {{ secrets.AWS_ACCOUNT_ID }}
+    # AWS_REGION_ID: {{ secrets.AWS_REGION_ID }}

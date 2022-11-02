@@ -1,13 +1,11 @@
-import {Construct, Stack, StackProps} from '@aws-cdk/core';
-
-interface AbstractStackProps extends Omit<StackProps, 'env'> {
+interface AbstractStackProps {
     
 }
 
-abstract class AbstractStack extends Stack {
+abstract class AbstractStack {
 
-    protected constructor(scope: Construct, id: string, props: AbstractStackProps) {
-        super(scope, id, props ?? {});
+    protected constructor(id: string, props: AbstractStackProps) {
+        
     }
 }
 

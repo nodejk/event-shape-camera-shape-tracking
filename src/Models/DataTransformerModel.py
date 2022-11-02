@@ -2,8 +2,8 @@ from abc import abstractmethod
 from src.Models.AbstractModule import AbstractModule
 from typing import List
 
-class DataProcessorModel(AbstractModule):
-    name: str
+class DataTransformerModel(AbstractModule):
+    modelName: str
 
     def __init__(self, configuration: dict) -> None:
         self.modelName = self.toPascalCase(self.__class__.__name__)
@@ -11,7 +11,7 @@ class DataProcessorModel(AbstractModule):
         self.setParameters()
 
     @abstractmethod
-    def processData(self, input):
+    def transform() -> None:
         pass
     
     def setParameters(self):

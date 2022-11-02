@@ -1,0 +1,58 @@
+{
+    "batch-size": 10,
+    "epochs": 100,
+    "model-save-path": "/Users/krishnasharma/Desktop/",
+    "model-parameters": {
+        "model-name": "kMeans",
+        "restore-model": false,
+        "parameters": {
+            "num-clusters": 10,
+            "test-parameter": 12312,
+            "test-parameter-2": "esdfsd"
+        },
+        "restore-model-parameters": {
+            "iterationToRestoreFrom": 0,
+            "modelPath": ""
+        }
+    },
+    "data-processors": {
+        "processed-data-path": "test",
+        "use-preprocessed-data": false,
+        "data-input-path": "/Users/krishnasharma/Desktop/model-data",
+        "processed-data-saved-path": "/Users/krishnasharma/Desktop/model-pre-processed-data",
+        "train-validation-test-split": {
+            "train-percentage": 60,
+            "validation-percentage": 30,
+            "test-percentage": 10
+        },
+        "steps" : [
+            {
+                "name": "Crop",
+                "parameters": {
+                    "x-left": 0,
+                    "x-right": 10,
+                    "y-top": 100,
+                    "y-bottom": 200
+                }
+            },
+            {
+                "name": "Crop",
+                "parameters": {
+                    "x-left": 10,
+                    "x-right": 100,
+                    "y-top": 100,
+                    "y-bottom": 200
+                }
+            }
+        ]
+    },
+    "data-transformers": [
+        {
+            "name": "normalize",
+            "parameters": {
+                "output-range-min": 0,
+                "output-range-max": 10
+            }
+        }
+    ]
+}
