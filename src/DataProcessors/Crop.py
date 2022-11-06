@@ -6,8 +6,8 @@ class Crop(DataProcessorModel):
     yTop: int
     yBottom: int
 
-    def __init__(self, requiredParametersList: list) -> None:
-        super().__init__(requiredParametersList)
+    def __init__(self, configuration: dict) -> None:
+        super().__init__(configuration)
     
     def processData(self, input):
         print("self.xLeft-->" + str(self.xLeft))

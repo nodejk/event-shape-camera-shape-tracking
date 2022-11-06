@@ -2,6 +2,7 @@
     "batch-size": 10,
     "epochs": 100,
     "model-save-path": "/Users/krishnasharma/Desktop/",
+    "pipeline-type": "process-data",
     "model-parameters": {
         "model-name": "kMeans",
         "restore-model": false,
@@ -27,7 +28,7 @@
         },
         "steps" : [
             {
-                "name": "Crop",
+                "name": "crop",
                 "parameters": {
                     "x-left": 0,
                     "x-right": 10,
@@ -36,12 +37,10 @@
                 }
             },
             {
-                "name": "Crop",
+                "name": "rotation",
                 "parameters": {
-                    "x-left": 10,
-                    "x-right": 100,
-                    "y-top": 100,
-                    "y-bottom": 200
+                    "x-rotation": -10,
+                    "y-rotation": 100
                 }
             }
         ]

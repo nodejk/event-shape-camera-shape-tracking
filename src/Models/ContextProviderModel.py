@@ -18,7 +18,7 @@ class ContextProviderModel():
     modelPath: str = "EventCameraModels"
     dataProcessorPath: str = "DataProcessors"
     dataTransformersPath: str = "DataTransformers"
-
+    
     def __init__(self) -> None:
         self._configuration = ConfigurationProvider()
         self._dataTransformers = []
@@ -64,12 +64,10 @@ class ContextProviderModel():
 
     def loadModel(self) -> None:
         modelName = self._configuration.modelParameters.modelName
-
         if (self._configuration.modelParameters.restoreModel == True):
-            self._model = self.getModelInstance()
+            self._model = self.getInstance(self.modelPath, modelName, self._configuration.modelParameters.parameters)
             self._iteration = self._configuration.modelParameters.restoreModelParameters.iterationToRestoreFrom
         else:
-            print(self._configuration.modelParameters)
             self._model = self.getInstance(self.modelPath, modelName, self._configuration.modelParameters.parameters)
             self._iteration = 0
     

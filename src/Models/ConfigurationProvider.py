@@ -2,6 +2,8 @@ import json
 from typing import List
 import os
 from dataclasses import dataclass
+from src.Types.PipelineEnum import PipelineEnum
+import sys
 
 @dataclass
 class ModelRestoreParameters:
@@ -41,6 +43,7 @@ class ConfigurationProvider:
     epochs: int
     modelSavePath: str
     dataInputPath: str
+    pipelineType: PipelineEnum
     modelParameters: ModelParamtersConfig
     dataProcessors: DataProcessorConfig
     dataTransformers: List[DataConfig]
@@ -60,9 +63,13 @@ class ConfigurationProvider:
         self.dataTransformers = [DataConfig(**transformer) for transformer in configurationProvided['dataTransformers']]
         self.epochs = configurationProvided['epochs']
         self.batchSize = configurationProvided['batchSize']
+        self.pipelineType = configurationProvided['pipelineType']
 
-    def checkConfiguration():
-        pass
+        self.checkConfiguration()
+
+    def checkConfiguration(self):
+        if self.pipelineType not in (PipelineEnum()).getAllValues():
+            raise Exception('Pipeline can be one of {}. Please check config.json'.format(PipelineEnum().getAllValues()))
 
     def kebabToCamelCase(self, parameterName: str) -> str:
         components = parameterName.split('-')
