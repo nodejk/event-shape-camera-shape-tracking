@@ -22,8 +22,7 @@ class EventCameraModel(AbstractModule):
         raise NotImplementedError
     
     @abstractmethod
-    def loadFromSnapShot(self, epochToRestoreFrom: str or int):
-        self.__dict__.update()
+    def loadFromSnapShot(self, epochToRestoreFrom: str):
         raise NotImplementedError
 
     @abstractmethod

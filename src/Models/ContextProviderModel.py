@@ -7,6 +7,9 @@ from src.Models.DataTransformerModel import DataTransformerModel
 from src.Models.EventCameraModel import EventCameraModel
 import importlib
 from src.utils.string import pascalCase
+from src.Types.PipelineEnum import PipelineEnum
+from datetime import datetime
+import os
 
 class ContextProviderModel():
     _iteration: int
@@ -18,6 +21,9 @@ class ContextProviderModel():
     modelPath: str = "EventCameraModels"
     dataProcessorPath: str = "DataProcessors"
     dataTransformersPath: str = "DataTransformers"
+
+    saveProcessedDataPath: str
+    saveMachineLearningExperimentsPath: str
     
     def __init__(self) -> None:
         self._configuration = ConfigurationProvider()
@@ -28,44 +34,71 @@ class ContextProviderModel():
         self.loadModel()
         self.setDataTransformerInstances()
         self.setDataProcessorInstances()
+        self.saveProcessedDataPath = 'preProcessedData' + '/' + self.currentTimeStamp()
+        self.saveMachineLearningExperimentsPath = 'machineLearningExperiments' + '/' + self.currentTimeStamp()
+        
+        self.initPipeline()
+    
+    def initPipeline(self, ) -> None:
+        if (self._configuration.pipelineType == PipelineEnum.PROCESS_DATA): self.preProcessData()
+        if (self._configuration.pipelineType == PipelineEnum.TRAIN_MODEL): self.trainModel()
 
-        if self._configuration.dataProcessors.usePreprocessedData == False:
-            self.preProcessData()
+    def trainModel(self, ) -> None:
+        print('Training Machine Learning Model.....')
+
+        if self._configuration.modelParameters.restoreModel == True:
+            pass
+        else:
+            pass        
+
+        pass
 
     def checkIfConfigurationPossible(self) -> bool:
         pass
 
     def checkIfModelExists(self) -> bool:
         pass
+    
+    @abstractmethod
+    def openFile(self, filePath):
+        raise Exception('Open file not implemented.')
 
-    def openFile(self):
-        return "123"
+    @abstractmethod
+    def writeProcessedData(self, dataToSave, fileName: str):
+        raise Exception('Write file not implemented')
+
+    def currentTimeStamp(self, ) -> str:
+        dateTimeObj = datetime.now()
+        return dateTimeObj.year + '_' + dateTimeObj.month + '_' + dateTimeObj.day + '_' + dateTimeObj.hour + '_' + dateTimeObj.minute + '_' + dateTimeObj.second
 
     def preProcessData(self) -> bool:
         print('Processing Data...')
         inputDataPath = self._configuration.dataProcessors.dataInputPath
 
         files = glob(inputDataPath + '/*')
-        print(files)
+
         if len(files) == 0:
             raise Exception('No files found in directory {}'.format(inputDataPath))
 
-        for file in files:
-            lastOutput = None
-            for index, dataProcessor in enumerate(self._dataProcessors):
-                if index == 0:
-                    output = self.openFile()
-                lastOutput = dataProcessor.processData(output)
+        for filePath in files:
+            output = self.openFile(filePath)
+            _, fileName = os.path.split(filePath)
 
-                print("index-->", output)
+            for dataProcessor in self._dataProcessors:
+                output = dataProcessor.processData(output)
+            self.writeProcessedData(output, fileName)
 
     def run(self) -> None:
         pass
+    
+    def saveProcessedData(self) -> List[str]:
+        self._configuration.dataProcessors.processedDataPath + ''
 
     def loadModel(self) -> None:
         modelName = self._configuration.modelParameters.modelName
         if (self._configuration.modelParameters.restoreModel == True):
             self._model = self.getInstance(self.modelPath, modelName, self._configuration.modelParameters.parameters)
+            self._model.loadFromSnapShot(self._configuration.modelParameters.restoreModelParameters.iterationToRestoreFrom)
             self._iteration = self._configuration.modelParameters.restoreModelParameters.iterationToRestoreFrom
         else:
             self._model = self.getInstance(self.modelPath, modelName, self._configuration.modelParameters.parameters)
@@ -78,7 +111,7 @@ class ContextProviderModel():
     def toPascalCase(self, modelName: str) -> str:
         return pascalCase(modelName)
     
-    def getInstance(self, modelPath: str, modelName: str, configuration: dict,):
+    def getInstance(self, modelPath: str, modelName: str, configuration: dict,) -> EventCameraModel:
         pascalModelName: str = self.toPascalCase(modelName)
 
         importModule = importlib.import_module('src.{}.'.format(modelPath) + pascalModelName)
@@ -90,13 +123,12 @@ class ContextProviderModel():
         
         return model
     
-    def setDataTransformerInstances(self) -> str:
+    def setDataTransformerInstances(self) -> None:
         for dataTransformer in self._configuration.dataTransformers:
             dataTransformerModel = self.getInstance(self.dataTransformersPath, dataTransformer.name, dataTransformer.parameters)
             self._dataTransformers.append(dataTransformerModel)
     
-    def setDataProcessorInstances(self) -> str:
+    def setDataProcessorInstances(self) -> None:
         for dataProcessorStep in self._configuration.dataProcessors.steps:
             dataProcessorModel = self.getInstance(self.dataProcessorPath, dataProcessorStep.name, dataProcessorStep.parameters)
             self._dataProcessors.append(dataProcessorModel)
-

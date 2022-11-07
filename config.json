@@ -12,15 +12,13 @@
             "test-parameter-2": "esdfsd"
         },
         "restore-model-parameters": {
-            "iterationToRestoreFrom": 0,
             "modelPath": ""
         }
     },
     "data-processors": {
         "processed-data-path": "test",
-        "use-preprocessed-data": false,
+        "class-balanced-split": "",
         "data-input-path": "/Users/krishnasharma/Desktop/model-data",
-        "processed-data-saved-path": "/Users/krishnasharma/Desktop/model-pre-processed-data",
         "train-validation-test-split": {
             "train-percentage": 60,
             "validation-percentage": 30,
@@ -51,6 +49,13 @@
             "parameters": {
                 "output-range-min": 0,
                 "output-range-max": 10
+            }
+        },
+        {
+            "name": "augmentation",
+            "parameters": {
+                "x-rotation": 10,
+                "y-rotataion": 10
             }
         }
     ]

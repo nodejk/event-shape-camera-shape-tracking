@@ -31,9 +31,8 @@ class TrainValidationTestSplit:
 @dataclass
 class DataProcessorConfig:
     processedDataPath: str
-    usePreprocessedData: bool
     dataInputPath: str
-    processedDataSavedPath: str
+    classBalancedSplit: bool
     trainValidationTestSplit: TrainValidationTestSplit
     steps: List[DataConfig]
 
