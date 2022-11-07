@@ -30,7 +30,6 @@ class ContextProviderModel():
         self._dataTransformers = []
         self._dataProcessors = []
 
-        print(self._configuration.batchSize)
         self.loadModel()
         self.setDataTransformerInstances()
         self.setDataProcessorInstances()

@@ -8,5 +8,4 @@ class Normalize(DataTransformerModel):
         super().__init__(configuration)
 
     def transform(self) -> None:
-        print("self.outputRangeMin--->" + str(self.outputRangeMin))
-        print("self.outputRangeMax--->" + str(self.outputRangeMax))
+       pass

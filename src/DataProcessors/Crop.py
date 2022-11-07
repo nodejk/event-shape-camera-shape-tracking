@@ -10,8 +10,4 @@ class Crop(DataProcessorModel):
         super().__init__(configuration)
     
     def processData(self, input):
-        print("self.xLeft-->" + str(self.xLeft))
-        print("self.xRight-->" + str(self.xRight))
-        print("self.yTop-->" + str(self.yTop))
-        print("self.yBottom-->" + str(self.yBottom))
-        
+        pass

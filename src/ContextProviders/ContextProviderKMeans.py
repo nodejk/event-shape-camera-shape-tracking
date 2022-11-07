@@ -7,5 +7,4 @@ class ContextProviderKMeansModel(ContextProviderModel):
         super().__init__()
 
         self._model.fit(1, 2)
-        for dataProcessor in self._dataProcessors:
-            print(dataProcessor.processData(123))
+        

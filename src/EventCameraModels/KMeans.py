@@ -9,17 +9,13 @@ class KMeans(EventCameraModel):
         super().__init__(configuration)
         
     def loadFromSnapShot(self, epochToRestoreFrom: str or int):
-        print("here")
-        return super().loadFromSnapShot(epochToRestoreFrom)
+        pass
     
     def predict(self, xTrain):
-        print("predict")
+        pass
     
     def initNewModel(self, initParameters) -> None:
-        print("new model")
+        pass
 
     def fit(self, xTrain, yTrain):
-        print(self.numClusters)
-        print(self.testParameter)
-        print(self.testParameter2)
-        print("fit")
+        pass

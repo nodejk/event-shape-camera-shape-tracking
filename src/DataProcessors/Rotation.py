@@ -8,5 +8,4 @@ class Rotation(DataProcessorModel):
         super().__init__(configuration)
 
     def processData(self, input):
-        print('xRotation-->', str(self.xRotation))
-        print('yRotation-->', str(self.yRotation))
+        pass
