@@ -19,3 +19,6 @@ class KMeans(EventCameraModel):
 
     def fit(self, xTrain, yTrain):
         pass
+
+    def cluster(self, data):
+        pass
