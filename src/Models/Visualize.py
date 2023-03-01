@@ -1,12 +1,12 @@
-from abc import ABC, abstractmethod
-from src.Models.EventCameraModel import EventCameraModel
+import abc
+from Models.EventCamera import EventCameraModel
 
-class VisualizationAbstractModel():
+class Visualize:
 
     def __init__(self, model: EventCameraModel) -> None:
         self.model: EventCameraModel = model
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def saveVisualization(self) -> None:
         pass

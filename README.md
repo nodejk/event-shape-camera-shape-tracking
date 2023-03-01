@@ -11,3 +11,6 @@ Example: https://www.meistertask.com/app/task/task-id/task-name
 2. improvement/task-id-task-name_a_short_description_of_task
 3. feature/task-id-task-name_a_short_description_of_task
 4. new-algo/task-id-task-name_a_short_description_of_task
+
+
+C:\Users\Krishna\event-camera

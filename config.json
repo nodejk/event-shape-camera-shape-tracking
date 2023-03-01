@@ -1,61 +1,56 @@
 {
-    "batch-size": 10,
+    "batch_size": 10,
     "epochs": 100,
-    "model-save-path": "/Users/krishnasharma/Desktop/",
-    "pipeline-type": "process-data",
-    "model-parameters": {
-        "model-name": "kMeans",
-        "restore-model": false,
+    "model": "GSCEventMOD",
+    "pipeline_type": "real-time",
+    "model_parameters": {
+        "restore_model": false,
         "parameters": {
-            "num-clusters": 10,
-            "test-parameter": 12312,
-            "test-parameter-2": "esdfsd"
-        },
-        "restore-model-parameters": {
-            "modelPath": ""
+            "min_num_clusters" : 2,
+            "max_num_clusters": 6,
+            "num_neighbors": 30
         }
     },
-    "data-processors": {
-        "processed-data-path": "test",
-        "class-balanced-split": "",
-        "data-input-path": "/Users/krishnasharma/Desktop/model-data",
-        "train-validation-test-split": {
-            "train-percentage": 60,
-            "validation-percentage": 30,
-            "test-percentage": 10
+    "aedat_file_reader_config": {
+        "path": "./",
+        "save_path": "./"
+    },
+    "data_processors": {
+        "class_balanced_split": "",
+        "data_input_path": "/Users/krishnasharma/Desktop/model_data",
+        "train_validation_test_split": {
+            "train_percentage": 60,
+            "validation_percentage": 30,
+            "test_percentage": 10
         },
         "steps" : [
             {
                 "name": "crop",
                 "parameters": {
-                    "x-left": 0,
-                    "x-right": 10,
-                    "y-top": 100,
-                    "y-bottom": 200
+                    "x_left": 0,
+                    "x_right": 10,
+                    "y_top": 100,
+                    "y_bottom": 200
                 }
             },
             {
-                "name": "rotation",
+                "name": "noise_filter",
                 "parameters": {
-                    "x-rotation": -10,
-                    "y-rotation": 100
+                    "load_model": true,
+                    "model_path": "./",
+                    "random_state": 10,
+                    "n_jobs": -1,
+                    "contamination": 10
                 }
             }
         ]
     },
-    "data-transformers": [
+    "data_transformers": [
         {
             "name": "normalize",
             "parameters": {
-                "output-range-min": 0,
-                "output-range-max": 10
-            }
-        },
-        {
-            "name": "augmentation",
-            "parameters": {
-                "x-rotation": 10,
-                "y-rotataion": 10
+                "output_range_min": 0,
+                "output_range_max": 10
             }
         }
     ]
