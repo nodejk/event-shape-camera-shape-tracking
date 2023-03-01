@@ -9,3 +9,6 @@ class BaseDataProcessor(pydantic.BaseModel):
     @abc.abstractmethod
     def process_data(self, input: numpy.array):
         raise Exception('Method process_data not implemented for data processor model: {}'.format(self.name))
+    
+    class Config:
+        arbitrary_types_allowed = True

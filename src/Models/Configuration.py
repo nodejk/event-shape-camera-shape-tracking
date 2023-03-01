@@ -13,7 +13,6 @@ class ModelRestoreParameters:
 class ModelParamtersConfig:
     restore_model: bool
     parameters: dict
-    restore_model_parameters: ModelRestoreParameters
 
 @dataclass
 class DataConfig:
@@ -33,9 +32,15 @@ class DataProcessorConfig:
     train_validation_test_split: TrainValidationTestSplit
     steps: List[DataConfig]
 
+@dataclass
+class AedatFileReaderConfig:
+    path: str
+
 class Configuration(BaseModel):
     model: str
     pipeline_type: str
+    aedat_file_reader_config: AedatFileReaderConfig
+    visualize: bool
     model_parameters: ModelParamtersConfig
     data_processors: DataProcessorConfig
     data_transformers: List[DataConfig]

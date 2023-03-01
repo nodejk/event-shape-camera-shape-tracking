@@ -1,14 +1,15 @@
 import cv2 as cv
 from dv import NetworkFrameInput
+import pydantic
 
-class VideoStream:
-    camera: cv.VideoCapture
+
+class VideoStreamer(pydantic.BaseModel):
     address: str
     port: int
 
-    def __init__(self, address: str, port: int) -> None:
-        self.address = address
-        self.port = port
+    # def __init__(self, address: str, port: int) -> None:
+    #     self.address = address
+    #     self.port = port
 
         # self.camera = cv.VideoCapture(url)
 
@@ -16,13 +17,15 @@ class VideoStream:
         #     print('Camera not working')
         #     exit()
     
-        pass
+        # pass
 
-    def getStream(self):
+    def __iter__(self):
         with NetworkFrameInput(address=self.address, port=self.port) as stream:
             for frame in stream:
                 yield frame
-        
+
+    class Config:
+        arbitrary_types_allowed = True
         # while True:
         #     ret, frame = self.camera.read()
             

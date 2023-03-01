@@ -1,12 +1,12 @@
-import abc
-from Models.EventCamera import EventCameraModel
+import cv2 as cv
+import numpy
+
 
 class Visualize:
 
-    def __init__(self, model: EventCameraModel) -> None:
-        self.model: EventCameraModel = model
-        pass
-
-    @abc.abstractmethod
-    def saveVisualization(self) -> None:
-        pass
+    @staticmethod
+    def visualize(input: numpy.array, window_name: str) -> None:
+        cv.imshow(window_name, input)
+        
+        if cv.waitKey(10) == 13:
+            return

@@ -2,19 +2,20 @@
     "batch_size": 10,
     "epochs": 100,
     "model": "GSCEventMOD",
-    "pipeline_type": "real-time",
+    "pipeline_type": "step-prediction",
     "model_parameters": {
         "restore_model": false,
         "parameters": {
             "min_num_clusters" : 2,
             "max_num_clusters": 6,
-            "num_neighbors": 30
+            "num_neighbors": 30,
+            "num_cluster": 10
         }
     },
     "aedat_file_reader_config": {
-        "path": "./",
-        "save_path": "./"
+        "path": "C:/Users/Krishna/event-camera/dvSave-2022_11_29_19_20_59.aedat4"
     },
+    "visualize" : true,
     "data_processors": {
         "class_balanced_split": "",
         "data_input_path": "/Users/krishnasharma/Desktop/model_data",
@@ -36,7 +37,7 @@
             {
                 "name": "noise_filter",
                 "parameters": {
-                    "load_model": true,
+                    "load_model": false,
                     "model_path": "./",
                     "random_state": 10,
                     "n_jobs": -1,

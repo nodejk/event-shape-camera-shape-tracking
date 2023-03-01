@@ -3,6 +3,8 @@ import numpy
 from sklearn.ensemble import IsolationForest
 import typing
 import joblib
+import pydantic
+
 
 class DataProcessor(BaseDataProcessor):
     load_model: bool
@@ -10,12 +12,11 @@ class DataProcessor(BaseDataProcessor):
     random_state: int
     n_jobs: int
     contamination: int
-    isoloation_forest: typing.Optional[IsolationForest] = IsolationForest
-    
-    def __init_subclass__(cls) -> None:
-        return super().__init_subclass__()
-    
-    def __post_init__(self):
+    isoloation_forest: IsolationForest = None
+
+    def __init__(self, **data: typing.Any) -> None:
+        super().__init__(**data)
+        
         if (self.load_model):
             self.isoloation_forest = joblib.load(self.model_path)
         else:

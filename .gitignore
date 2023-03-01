@@ -1,2 +1,12 @@
 node_modules
-experiments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/

@@ -1,17 +1,22 @@
 import abc
 import pydantic
 import numpy
+import typing
 
 
 class EventCamera(pydantic.BaseModel):
     model_name: str
 
     @abc.abstractmethod
+    def predict(self, input: numpy.array) -> None:
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def find_optimal_parameters(self, input: numpy.array) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def cluster(self, input: numpy.array) -> numpy.array:
+    def cluster(self, **data: typing.Any) -> numpy.array:
         raise NotImplementedError
     
     @abc.abstractmethod
