@@ -2,7 +2,7 @@ import cv2 as cv
 import numpy
 
 
-class Visualize:
+class Visualizer:
 
     @staticmethod
     def visualize(input: numpy.array, window_name: str) -> None:

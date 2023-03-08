@@ -11,7 +11,7 @@ import os
 import hashlib
 import json
 from datetime import datetime
-from src.Models.Visualize import Visualize
+from src.Models.Visualizer import Visualizer
 import numpy
 import pathlib
 import importlib
@@ -37,7 +37,7 @@ class Pipeline:
 
         self.model = self.__get_model()
 
-        # self._create_new_session()
+        # self.__create_new_session()
         # self.__save_configuration()
 
         match configuration.pipeline_type:
@@ -47,7 +47,7 @@ class Pipeline:
             case _:
                 raise Exception('Pipeline Type not found')
 
-    def _create_new_session(self) -> None:
+    def __create_new_session(self) -> None:
         current_timestamp: str = datetime.now().isoformat()
         hash_digest: str = hashlib.sha1(str.encode(current_timestamp)).hexdigest()[0:10]
 

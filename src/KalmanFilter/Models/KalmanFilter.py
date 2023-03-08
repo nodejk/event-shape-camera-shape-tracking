@@ -1,29 +1,64 @@
 import pydantic
 import typing
 import numpy
+from stonesoup.models.transition.linear import (
+    CombinedLinearGaussianTransitionModel,
+    ConstantVelocity, 
+    RandomWalk, 
+    ConstantNthDerivative,
+)
+from stonesoup.hypothesiser.distance import DistanceHypothesiser
+from stonesoup.measures import Mahalanobis
+from stonesoup.models.measurement.linear import LinearGaussian
+from stonesoup.predictor.kalman import KalmanPredictor
+from stonesoup.updater.kalman import KalmanUpdater
+from stonesoup.types.state import GaussianState
+from stonesoup.types.array import CovarianceMatrix, StateVector
+from stonesoup.initiator.simple import MultiMeasurementInitiator
+from stonesoup.deleter.time import UpdateTimeStepsDeleter
+from stonesoup.dataassociator.neighbour import GNNWith2DAssignment
+from stonesoup.tracker.simple import MultiTargetTracker
 
 
-class KalmanFilter(pydantic.BaseModel):
-    dt: int
+class KalmanFilter:
+    tracker: MultiTargetTracker
 
-    acc_x: float
-    acc_y: float
+    def __init__(self) -> None:
+        transition_model = CombinedLinearGaussianTransitionModel(**KalmanFilter.get_transition_models())
+        measurement_model = LinearGaussian(**KalmanFilter.get_measurement_model_properties())
 
-    noise_magnitude: float
+        predictor: KalmanPredictor = KalmanPredictor(transition_model)
+        updater: KalmanUpdater = KalmanUpdater(measurement_model)
 
-    std_x: float
-    std_y: float
+        hypothesiser = DistanceHypothesiser(predictor, updater, Mahalanobis(), 10)  
+        
+        prior_state = GaussianState(StateVector(numpy.zeros((6,1))),
+                                    CovarianceMatrix(numpy.diag([100**2, 30**2, 100**2, 30**2, 100**2, 100**2])))
+        
+        deleter_init = UpdateTimeStepsDeleter(time_steps_since_update=3)
 
-    control_input_var: numpy.array
-    
-    def __init__(self, **data: typing.Any) -> None:
-        super().__init__(**data)
+        data_associator = GNNWith2DAssignment(hypothesiser)
 
-        self.control_input_var = numpy.matrix([[self.acc_x], [self.acc_y]]) 
+        initiator = MultiMeasurementInitiator(prior_state, deleter_init, data_associator, updater,
+                                    measurement_model, min_points=10)
+        
+        deleter = UpdateTimeStepsDeleter(time_steps_since_update=15)
+
+        self.tracker = MultiTargetTracker(
+            initiator=initiator,
+            deleter=deleter,
+            data_associator=data_associator,
+            updater=updater,
+        )
 
     @staticmethod
-    def get_initial_state() -> numpy.matrix:
-        return numpy.matrix
-
-    class Config:
-        arbitrary_types_allowed = True        
+    def get_transition_models() -> typing.List[ConstantNthDerivative]:
+        return [ConstantVelocity(20**2), ConstantVelocity(20**2), RandomWalk(20**2), RandomWalk(20**2)]
+    
+    @staticmethod
+    def get_measurement_model_properties() -> typing.Dict:
+        return {
+            "ndim": 6,
+            "mapping": [0, 2, 4, 5],
+            "noise_covar": numpy.diag([1**2, 1**2, 3**2, 3**2]),
+        }

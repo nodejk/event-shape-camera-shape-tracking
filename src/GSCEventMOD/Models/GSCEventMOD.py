@@ -3,19 +3,32 @@ from sklearn.neighbors import kneighbors_graph
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import SpectralClustering
 import numpy
-import abc
+import pydantic
 import typing
+from src.Enums.ModelModeEnum import ModelModeEnum
 
 
 class GSCEventMOD(EventCamera):
     num_neighbors: int
-    min_num_clusters: int
-    max_num_clusters: int
+    mode: ModelModeEnum
 
-    num_cluster: typing.Optional[int]
+    min_num_clusters: typing.Optional[int] = None
+    max_num_clusters: typing.Optional[int] = None
 
-    max_score: float = float("infinity")
+    num_clusters: typing.Optional[int] = None
+
+    max_score: float = float('infinity')
     optimal_clusters: int = 0
+    
+    @pydantic.validator('mode', always=True)
+    def validate_mode(cls, mode, values):
+        if (mode == ModelModeEnum.FIND_OPTIMAL_CLUSTERS.value):
+            if ('min_num_clusters' not in values or 'max_num_clusters' not in values):
+                raise ValueError('Provide min_num_clusters and max_num_clusters to find the optimal number of clusters')
+        else:
+            if ('num_clusters' not in values):
+                raise ValueError('Provide num_clusters in config in order to cluster')
+
 
     def __init_subclass__(cls) -> None:
         return super().__init_subclass__()
@@ -51,7 +64,7 @@ class GSCEventMOD(EventCamera):
         if self.num_cluster is None:
             raise Exception('Parameter num_cluster is None')
          
-        return self.__cluster(data, self.num_cluster)
+        return self.__cluster(data, self.num_clusters)
 
     def __cluster(self, input: numpy.array, num_cluster: int) -> numpy.array:
         adjacencyMatrix: numpy.array = kneighbors_graph(
