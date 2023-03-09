@@ -19,26 +19,30 @@ class GSCEventMOD(EventCamera):
 
     max_score: float = float('infinity')
     optimal_clusters: int = 0
-    
-    @pydantic.validator('mode', always=True)
-    def validate_mode(cls, mode, values):
+
+    @pydantic.root_validator()
+    @classmethod
+    def validate_mode(cls, field_values):
+        mode: str = field_values['mode']
+
         if (mode == ModelModeEnum.FIND_OPTIMAL_CLUSTERS.value):
-            if ('min_num_clusters' not in values or 'max_num_clusters' not in values):
+            if ('min_num_clusters' not in field_values or 'max_num_clusters' not in field_values):
                 raise ValueError('Provide min_num_clusters and max_num_clusters to find the optimal number of clusters')
         else:
-            if ('num_clusters' not in values):
+            if ('num_clusters' not in field_values):
                 raise ValueError('Provide num_clusters in config in order to cluster')
 
+        return field_values
 
     def __init_subclass__(cls) -> None:
         return super().__init_subclass__()
     
     def predict(self, input: numpy.array) -> None:
-        raise NotImplemented
-    
+        raise NotImplemented('predict not implemented')
+
     def init_new_model(self) -> None:
         raise Exception('Not Implemented')
-    
+
     def load_from_snapshot(self) -> None:
         raise Exception('Not Implemented')
 
@@ -59,17 +63,17 @@ class GSCEventMOD(EventCamera):
             if current_silhouette_score > self.max_score:
                 self.max_score = current_silhouette_score
                 self.optimal_clusters = cluster
-    
-    def cluster(self, **data: typing.Any) -> numpy.array:
-        if self.num_cluster is None:
+
+    def cluster(self, data: numpy.array) -> numpy.array:
+        if self.num_clusters is None:
             raise Exception('Parameter num_cluster is None')
          
         return self.__cluster(data, self.num_clusters)
 
     def __cluster(self, input: numpy.array, num_cluster: int) -> numpy.array:
         adjacencyMatrix: numpy.array = kneighbors_graph(
-            X=input, 
-            n_neighbors=self.num_neighbors
+            X=input,
+            n_neighbors=self.num_neighbors,
         )
 
         clustering: numpy.array = SpectralClustering(

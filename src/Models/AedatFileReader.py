@@ -16,19 +16,21 @@ class AedatFileReader(pydantic.BaseModel):
 
         with dv.AedatFile(self.path) as aedat_file:
             self.height, self.width = aedat_file['events'].size
-        
+
         aedat_file.close()
 
-    
     def __iter__(self) -> dv.Frame:
-        with dv.AedatFile(self.path) as aedat_file:
+        print(self.height, self.width)
 
-            print(aedat_file['events'].EventsLength())
-            for frame in aedat_file['events']:
-                # print("start", frame.from_fb())
-                
-                # print("ende", frame.timestamp_end_of_exposure)
-                yield frame
+        with dv.AedatFile(self.path) as aedat_file:
+            for frame in aedat_file['events'].numpy():
+                event = numpy.full((self.height, self.width), 0).astype(numpy.uint8)
+
+                for packet in frame:
+                    if (packet[3] == 1):
+                        event[packet[2]][packet[1]] = 255
+
+                yield event
 
     @property
     def __time_delay_between_each_packet(self):

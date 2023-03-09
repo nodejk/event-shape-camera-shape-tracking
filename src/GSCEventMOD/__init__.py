@@ -135,12 +135,23 @@ class Pipeline:
         self.file_reader = self.__get_file_reader()
 
         for frame in self.file_reader:
+            print(frame.shape)
             output: numpy.array = self.__get_prediction(frame)
-            
+            vid_output: numpy.array = self.__transform_output(output, frame)
+
+            print(vid_output.shape)
             if (self.configuration.visualize):
                 self.__visualize_output(frame, output)
         pass
 
+    def __transform_output(self, output: numpy.array, input: numpy.array) -> numpy.array:
+        points = numpy.asarray([
+            input[:][0][numpy.where(output == 1, True, False)],
+            input[:][1][numpy.where(output == 1, True, False)],
+            ])
+    
+        return points.astype(numpy.uint8)
+    
     def __get_prediction(self, input: numpy.array) -> None:
         processed_data = self.__get_processed_data(input)
         transformed_data = self.__get_transformed_data(processed_data)
@@ -148,8 +159,8 @@ class Pipeline:
         return self.model.cluster(transformed_data)
 
     def __visualize_output(self, input: numpy.array, output: numpy.array) -> None:
-        Visualize.visualize(input, 'input')
-        Visualize.visualize(output, 'output')
+        Visualizer.visualize(input, 'input')
+        Visualizer.visualize(output, 'output')
 
     def __real_time(self) -> None:
         self.video_streamer = self.__get_video_streamer()
