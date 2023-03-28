@@ -1,6 +1,5 @@
-app_src = app
-tests_src = tests
-all_src = $(app_src) $(tests_src)
+app_src = src
+all_src = $(app_src)
 
 test = python3.9 -m unittest discover -s ./tests -p '*Test.py' -v
 autoflake = autoflake -r --in-place --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports $(all_src)
