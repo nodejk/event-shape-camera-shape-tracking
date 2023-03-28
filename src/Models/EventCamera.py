@@ -18,7 +18,7 @@ class EventCamera(pydantic.BaseModel):
     @abc.abstractmethod
     def cluster(self, **data: typing.Any) -> numpy.array:
         raise NotImplementedError
-    
+
     @abc.abstractmethod
     def load_from_snapshot(self, epochToRestoreFrom: str) -> None:
         raise NotImplementedError

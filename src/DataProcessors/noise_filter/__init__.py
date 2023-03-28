@@ -16,8 +16,8 @@ class DataProcessor(BaseDataProcessor):
 
     def __init__(self, **data: typing.Any) -> None:
         super().__init__(**data)
-        
-        if (self.load_model):
+
+        if self.load_model:
             self.isoloation_forest = joblib.load(self.model_path)
         else:
             self.isoloation_forest = IsolationForest(
@@ -25,11 +25,11 @@ class DataProcessor(BaseDataProcessor):
                 n_jobs=self.n_jobs,
                 contamination=self.contamination,
             )
-    
+
     def process_data(self, input: numpy.array):
-        if (self.load_model):
+        if self.load_model:
             unwanted_input: numpy.array = self.isoloation_forest.predict(input)
-            
+
             return input[numpy.where(unwanted_input == 1, True, False)]
         else:
             clean_input: IsolationForest = self.isoloation_forest.fit(input)

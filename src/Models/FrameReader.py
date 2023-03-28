@@ -17,8 +17,8 @@ class FrameReader(FrameReader):
 
     def frames_gen(self):
         for path in self.paths:
-            with open(path, 'rb') as file_pointer:
+            with open(path, "rb") as file_pointer:
                 loaded_dictionary = pickle.load(file_pointer)
-                image = loaded_dictionary['image']
+                image = loaded_dictionary["image"]
 
             yield ImageFrame(image, datetime.datetime.now())

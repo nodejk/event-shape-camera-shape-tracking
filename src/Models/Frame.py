@@ -14,10 +14,10 @@ class Frame(pydantic.BaseModel):
     def __init__(self, **data: typing.Any) -> None:
         super().__init__(**data)
 
-        with open(self.path, 'rb') as file_pointer:
+        with open(self.path, "rb") as file_pointer:
             loaded_dictionary = pickle.load(file_pointer)
-            self.image = loaded_dictionary['image']
-            self.event = loaded_dictionary['events']
+            self.image = loaded_dictionary["image"]
+            self.event = loaded_dictionary["events"]
 
     class Config:
         allow_arbitary_types = True

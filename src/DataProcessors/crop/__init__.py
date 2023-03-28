@@ -10,6 +10,6 @@ class DataProcessor(BaseDataProcessor):
 
     def __init_subclass__(cls) -> None:
         return super().__init_subclass__()
-    
+
     def process_data(self, inputImage: numpy.array):
         return inputImage[self.y_top : self.y_bottom, self.x_left : self.x_right]

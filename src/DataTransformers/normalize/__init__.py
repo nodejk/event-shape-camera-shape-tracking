@@ -10,4 +10,4 @@ class DataTransformer(BaseDataTransformer):
         return super().__init_subclass__()
 
     def transform(self, input: numpy.array) -> None:
-       return input
+        return input

@@ -17,47 +17,52 @@ class GSCEventMOD(EventCamera):
 
     num_clusters: typing.Optional[int] = None
 
-    max_score: float = float('infinity')
+    max_score: float = float("infinity")
     optimal_clusters: int = 0
 
     @pydantic.root_validator()
     @classmethod
     def validate_mode(cls, field_values):
-        mode: str = field_values['mode']
+        mode: str = field_values["mode"]
 
-        if (mode == ModelModeEnum.FIND_OPTIMAL_CLUSTERS.value):
-            if ('min_num_clusters' not in field_values or 'max_num_clusters' not in field_values):
-                raise ValueError('Provide min_num_clusters and max_num_clusters to find the optimal number of clusters')
+        if mode == ModelModeEnum.FIND_OPTIMAL_CLUSTERS.value:
+            if (
+                "min_num_clusters" not in field_values
+                or "max_num_clusters" not in field_values
+            ):
+                raise ValueError(
+                    "Provide min_num_clusters and max_num_clusters to find the optimal number of clusters"
+                )
         else:
-            if ('num_clusters' not in field_values):
-                raise ValueError('Provide num_clusters in config in order to cluster')
+            if "num_clusters" not in field_values:
+                raise ValueError("Provide num_clusters in config in order to cluster")
 
         return field_values
 
     def __init_subclass__(cls) -> None:
         return super().__init_subclass__()
-    
+
     def predict(self, input: numpy.array) -> None:
-        raise NotImplemented('predict not implemented')
+        raise NotImplemented("predict not implemented")
 
     def init_new_model(self) -> None:
-        raise Exception('Not Implemented')
+        raise Exception("Not Implemented")
 
     def load_from_snapshot(self) -> None:
-        raise Exception('Not Implemented')
+        raise Exception("Not Implemented")
 
     def find_optimal_parameters(self, input: numpy.array) -> numpy.array:
-
         allClusters: typing.List[numpy.array] = []
         allScores: typing.List[float] = []
 
         for cluster in range(self.min_num_clusters, self.max_num_clusters):
-            
             clustering: numpy.array = self.__cluster(input, cluster)
 
             allClusters.append(clustering)
 
-            current_silhouette_score: float = self.calculate_silhouette_score(input, clustering)
+            current_silhouette_score: float = self.calculate_silhouette_score(
+                input, clustering
+            )
             allScores.append(current_silhouette_score)
 
             if current_silhouette_score > self.max_score:
@@ -66,9 +71,17 @@ class GSCEventMOD(EventCamera):
 
     def cluster(self, data: numpy.array) -> numpy.array:
         if self.num_clusters is None:
-            raise Exception('Parameter num_cluster is None')
-         
+            raise Exception("Parameter num_cluster is None")
+
         return self.__cluster(data, self.num_clusters)
+
+    def cluster_kalman(self, data: numpy):
+        return
+
+    def get_kalman_state(
+        self,
+    ):
+        pass
 
     def __cluster(self, input: numpy.array, num_cluster: int) -> numpy.array:
         adjacencyMatrix: numpy.array = kneighbors_graph(
@@ -77,15 +90,17 @@ class GSCEventMOD(EventCamera):
         )
 
         clustering: numpy.array = SpectralClustering(
-                n_clusters=num_cluster,
-                random_state=0,
-                affinity='precomputed_nearest_neighbors',
-                n_neighbors=self.num_neighbors,
-                assign_labels='kmeans',
-                n_jobs=-1
-            ).fit_predict(adjacencyMatrix)
-        
+            n_clusters=num_cluster,
+            random_state=0,
+            affinity="precomputed_nearest_neighbors",
+            n_neighbors=self.num_neighbors,
+            assign_labels="kmeans",
+            n_jobs=-1,
+        ).fit_predict(adjacencyMatrix)
+
         return clustering
-    
-    def calculate_silhouette_score(self, data: numpy.array, clustering: numpy.array) -> float:
+
+    def calculate_silhouette_score(
+        self, data: numpy.array, clustering: numpy.array
+    ) -> float:
         return silhouette_score(data, clustering)

@@ -1,5 +1,6 @@
 import pydantic
 
+
 class Box(pydantic.BaseSettings):
     x: int
     y: int

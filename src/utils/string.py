@@ -1,12 +1,16 @@
 import re
+
 PASCAL_RE = re.compile(r"([^\-_]+)")
 
+
 def lowerCase(string: str) -> str:
-        return str(string).lower()
+    return str(string).lower()
+
 
 def upperCase(string: str) -> str:
-    return str(string).upper()    
-        
+    return str(string).upper()
+
+
 def camelCase(string: str) -> str:
     def _replace_fn(match):
         return match.group(1)[0].upper() + match.group(1)[1:]
@@ -14,7 +18,10 @@ def camelCase(string: str) -> str:
     string = PASCAL_RE.sub(_replace_fn, string)
     if not string:
         return string
-    return lowerCase(string[0]) + re.sub(r"[\-_\.\s]([a-z])", lambda matched: upperCase(matched.group(1)), string[1:])
+    return lowerCase(string[0]) + re.sub(
+        r"[\-_\.\s]([a-z])", lambda matched: upperCase(matched.group(1)), string[1:]
+    )
+
 
 def pascalCase(string: str) -> str:
     if string.isupper() or string.isnumeric():
