@@ -5,15 +5,17 @@
     "pipeline_type": "step-prediction",
     "model_parameters": {
         "restore_model": false,
+        "num_grouped_events": 10,
         "parameters": {
             "min_num_clusters" : 2,
             "max_num_clusters": 6,
             "num_neighbors": 30,
-            "num_cluster": 10
+            "num_clusters": 2,
+            "mode": "find-optimal-clusters"
         }
     },
     "aedat_file_reader_config": {
-        "path": "C:/Users/Krishna/event-camera/dvSave-2022_11_29_19_20_59.aedat4"
+        "path": "./Cars_sequence.aedat4"
     },
     "visualize" : true,
     "data_processors": {

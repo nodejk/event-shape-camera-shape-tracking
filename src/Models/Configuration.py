@@ -14,6 +14,7 @@ class ModelRestoreParameters:
 @dataclass
 class ModelParamtersConfig:
     restore_model: bool
+    num_grouped_events: int
     parameters: dict
 
 

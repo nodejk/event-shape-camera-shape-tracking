@@ -6,7 +6,8 @@ from src.Enums.PipelineEnum import PipelineEnum
 from src.Models.AedatFileReader import AedatFileReader
 from src.Models.VideoStreamer import VideoStreamer
 from src.KalmanFilter.Models.KalmanFilter import KalmanFilter
-from GSCEventMOD.Models.DetectionGSCVideoEventReader import DetectionGSCVideoEventReader
+from src.GSCEventMOD.Models.DetectionGSCLiveVideoEventStreamer import DetectionGSCLiveVideoEventStreamer
+from src.GSCEventMOD.Models.DetectionGSCFileVideoEventStreamer import DetectionGSCFileVideoEventStreamer
 import typing
 import os
 import hashlib
@@ -136,24 +137,34 @@ class Pipeline:
 
         return output
 
-    def __get_video_streamer(self) -> DetectionGSCVideoEventReader:
-        return DetectionGSCVideoEventReader(
+    def __get_video_streamer(self) -> DetectionGSCLiveVideoEventStreamer:
+        return DetectionGSCLiveVideoEventStreamer(
             address=self.configuration.detection_gsc_event_reader_config.address,
             port=self.configuration.detection_gsc_event_reader_config.port,
             model_configurations=self.configuration.model_parameters,
         )
 
-    def __step_prediction(self) -> None:
-        self.file_reader = self.__get_file_reader()
-        frame: dv.Frame
-        for frame in self.file_reader:
-            print(frame.shape)
-            output: numpy.array = self.__get_prediction(frame)
-            vid_output: numpy.array = self.__transform_output(output, frame)
+    def __get_file_streamer(self) -> DetectionGSCFileVideoEventStreamer:
+        return DetectionGSCFileVideoEventStreamer()
 
-            print(vid_output.shape)
-            if self.configuration.visualize:
-                self.__visualize_output(frame, output)
+    def __step_prediction(self) -> None:
+        streamer: DetectionGSCFileVideoEventStreamer = self.__get_file_streamer()
+
+        detector: KalmanFilter = KalmanFilter(streamer)
+        tracker = detector.tracker
+
+        for timestamp, detections in tracker:
+            print(detections)
+        # self.file_reader = self.__get_file_reader()
+        # frame: dv.Frame
+        # for frame in self.file_reader:
+        #     print(frame.shape)
+        #     output: numpy.array = self.__get_prediction(frame)
+        #     vid_output: numpy.array = self.__transform_output(output, frame)
+
+        #     print(vid_output.shape)
+        #     if self.configuration.visualize:
+        #         self.__visualize_output(frame, output)
 
     def __transform_output(
         self, output: numpy.array, input: numpy.array
@@ -178,8 +189,10 @@ class Pipeline:
         Visualizer.visualize(output, "output")
 
     def __real_time(self) -> None:
-        detector: DetectionGSCVideoEventReader = self.__get_video_streamer()
+        streamer: DetectionGSCLiveVideoEventStreamer = self.__get_video_streamer()
 
-        KalmanFilter(detector)
+        detector: KalmanFilter = KalmanFilter(streamer)
+        tracker = detector.tracker
 
-        # for timestamp,
+        for timestamp, detections in tracker:
+            print(detections)

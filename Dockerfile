@@ -5,6 +5,8 @@ RUN apt-get update -y
 RUN apt-get install curl -y
 RUN apt-get install sudo -y
 
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
+
 WORKDIR /event-camera
 
 COPY ./ ./

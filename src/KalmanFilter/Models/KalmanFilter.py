@@ -25,7 +25,7 @@ class KalmanFilter:
 
     def __init__(self, detector: DetectionReader) -> None:
         transition_model = CombinedLinearGaussianTransitionModel(
-            **KalmanFilter.get_transition_models()
+            KalmanFilter.get_transition_models()
         )
         measurement_model = LinearGaussian(
             **KalmanFilter.get_measurement_model_properties()
@@ -60,6 +60,7 @@ class KalmanFilter:
 
         self.tracker = MultiTargetTracker(
             initiator=initiator,
+            detector=detector,
             deleter=deleter,
             data_associator=data_associator,
             updater=updater,
@@ -77,7 +78,7 @@ class KalmanFilter:
     @staticmethod
     def get_measurement_model_properties() -> typing.Dict:
         return {
-            "ndim": 6,
+            "ndim_state": 6,
             "mapping": [0, 2, 4, 5],
             "noise_covar": numpy.diag([1**2, 1**2, 3**2, 3**2]),
         }

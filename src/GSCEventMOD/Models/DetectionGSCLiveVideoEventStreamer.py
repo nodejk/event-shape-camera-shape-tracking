@@ -7,7 +7,7 @@ import typing
 import pydantic
 
 
-class DetectionGSCVideoEventReader(DetectionReader, pydantic.BaseSettings):
+class DetectionGSCLiveVideoEventStreamer(DetectionReader):
     address: str
     port: int
     model_configurations: typing.Dict[typing.Any, typing.Any]
@@ -17,27 +17,32 @@ class DetectionGSCVideoEventReader(DetectionReader, pydantic.BaseSettings):
     HEIGHT: int = 100
     WIDTH: int = 100
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def get_model(self) -> GSCEventMOD:
-        if DetectionGSCVideoEventReader.model == None:
-            DetectionGSCVideoEventReader.model = GSCEventMOD(self.model_configurations)
-        return DetectionGSCVideoEventReader.model
+        if DetectionGSCLiveVideoEventStreamer.model == None:
+            DetectionGSCLiveVideoEventStreamer.model = GSCEventMOD(
+                self.model_configurations
+            )
+        return DetectionGSCLiveVideoEventStreamer.model
 
     @BufferedGenerator.generator_method
     def detections_gen(self):
         with dv.NetworkNumpyEventPacketInput(
             address=self.address, port=self.port
         ) as stream:
-            model: GSCEventMOD = DetectionGSCVideoEventReader.model
+            model: GSCEventMOD = DetectionGSCLiveVideoEventStreamer.model
 
             for event_frame in stream:
-                event = DetectionGSCVideoEventReader.process_event(event_frame)
+                event = DetectionGSCLiveVideoEventStreamer.process_event(event_frame)
 
                 yield model.cluster(event)
 
     @staticmethod
     def process_event(frame) -> numpy:
-        height: int = DetectionGSCVideoEventReader.HEIGHT
-        width: int = DetectionGSCVideoEventReader.WIDTH
+        height: int = DetectionGSCLiveVideoEventStreamer.HEIGHT
+        width: int = DetectionGSCLiveVideoEventStreamer.WIDTH
 
         event = numpy.full((height, width), 0).astype(numpy.uint8)
 
