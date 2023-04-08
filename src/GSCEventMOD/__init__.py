@@ -103,6 +103,7 @@ class Pipeline:
         return data_processors
 
     def __get_data_transformers(self) -> typing.List[BaseDataTransformer]:
+        
         data_transformers: typing.List[BaseDataTransformer] = []
 
         for transformer_config in self.configuration.data_transformers:
