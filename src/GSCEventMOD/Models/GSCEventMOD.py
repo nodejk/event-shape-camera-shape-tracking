@@ -14,14 +14,22 @@ class GSCEventMOD(EventCamera):
     num_neighbors: int
     mode: ModelModeEnum
 
+    # typing.Optional(X) encourages those variables to be X, otherwise they are type None
+    # All threes values are set in config file
+    # Minimum number of clusters
     min_num_clusters: typing.Optional[int] = None
+    # Maximum number of clusters
     max_num_clusters: typing.Optional[int] = None
-
+    # Actual number of clusters
     num_clusters: typing.Optional[int] = None
 
+    #suggestion: maybe replace with math.inf, but depends on Python version
+    #otherwise, try: (inf = float('inf')) except: inf = <high value, e.g. 1e3000> 
     max_score: float = float("infinity")
     optimal_clusters: int = 0
 
+    # Checks if max_num_clusters, min_num_clusters and num_clusters are set
+    # Pydantic is library used for data validation/settings management
     @pydantic.root_validator()
     @classmethod
     def validate_mode(cls, field_values):
@@ -45,19 +53,25 @@ class GSCEventMOD(EventCamera):
     def __init_subclass__(cls) -> None:
         return super().__init_subclass__()
 
+    # Not implemented yet
     def predict(self, input: numpy.array) -> None:
         raise NotImplemented("predict not implemented")
 
+    # Not implemented yet
     def init_new_model(self) -> None:
         raise Exception("Not Implemented")
 
+    # Not implemented yet
     def load_from_snapshot(self) -> None:
         raise Exception("Not Implemented")
 
+    # 
     def find_optimal_parameters(self, input: numpy.array) -> numpy.array:
         allClusters: typing.List[numpy.array] = []
         allScores: typing.List[float] = []
 
+        # Takes input, clusters them, then checks if clusters are correct
+        # Assigns input to most optimal clusters afterwards
         for cluster in range(self.min_num_clusters, self.max_num_clusters):
             clustering: numpy.array = self.__cluster(input, cluster)
 
@@ -80,6 +94,7 @@ class GSCEventMOD(EventCamera):
 
         return self.__cluster(input_events, self.num_clusters, input_image)
 
+    # Not implemented yet
     def cluster_kalman(self, data: numpy):
         return
 
@@ -102,10 +117,13 @@ class GSCEventMOD(EventCamera):
     def nearest_neighbors(self, events: numpy.array) -> NearestNeighbors:
         return kneighbors_graph(
             events,
+            # num_neighbors is predefined
             n_neighbors=self.num_neighbors,
         )
-
     def build_graph(self, event_image: numpy.array):
+        # takes image as 2d-array as input (3d with color), extracts patches, 
+        # creates weighting matrix which shows which samples (pixels) are connected\
+        # img_to_graph returns pixel-to-pixel gradient connections, edges are weighted gradient values
         return image.img_to_graph(
             event_image,
         )
@@ -133,6 +151,8 @@ class GSCEventMOD(EventCamera):
 
         return detections, bounding_boxes
 
+    # Pretty much just sklearn.metrics.silhouette_score()
+    # Used to identify if sample is part of right cluster
     def calculate_silhouette_score(
         self, data: numpy.array, clustering: numpy.array
     ) -> float:
