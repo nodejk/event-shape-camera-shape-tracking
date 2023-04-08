@@ -24,9 +24,11 @@ class KalmanFilter:
     tracker: MultiTargetTracker
 
     def __init__(self, detector: DetectionReader) -> None:
+
         transition_model = CombinedLinearGaussianTransitionModel(
             KalmanFilter.get_transition_models()
         )
+
         measurement_model = LinearGaussian(
             **KalmanFilter.get_measurement_model_properties()
         )

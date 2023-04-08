@@ -4,7 +4,6 @@ from src.GSCEventMOD.Models.GSCEventMOD import GSCEventMOD
 import dv
 import numpy
 import typing
-import pydantic
 
 
 class DetectionGSCLiveVideoEventStreamer(DetectionReader):

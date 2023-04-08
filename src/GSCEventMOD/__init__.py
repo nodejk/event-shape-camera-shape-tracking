@@ -6,8 +6,12 @@ from src.Enums.PipelineEnum import PipelineEnum
 from src.Models.AedatFileReader import AedatFileReader
 from src.Models.VideoStreamer import VideoStreamer
 from src.KalmanFilter.Models.KalmanFilter import KalmanFilter
-from src.GSCEventMOD.Models.DetectionGSCLiveVideoEventStreamer import DetectionGSCLiveVideoEventStreamer
-from src.GSCEventMOD.Models.DetectionGSCFileVideoEventStreamer import DetectionGSCFileVideoEventStreamer
+from src.GSCEventMOD.Models.DetectionGSCLiveVideoEventStreamer import (
+    DetectionGSCLiveVideoEventStreamer,
+)
+from src.GSCEventMOD.Models.DetectionGSCFileVideoEventStreamer import (
+    DetectionGSCFileVideoEventStreamer,
+)
 import typing
 import os
 import hashlib
@@ -41,6 +45,7 @@ class Pipeline:
         self.model = self.__get_model()
 
         # self.__create_new_session()
+        
         # self.__save_configuration()
 
         match configuration.pipeline_type:
@@ -153,18 +158,25 @@ class Pipeline:
         detector: KalmanFilter = KalmanFilter(streamer)
         tracker = detector.tracker
 
-        for timestamp, detections in tracker:
-            print(detections)
-        # self.file_reader = self.__get_file_reader()
-        # frame: dv.Frame
-        # for frame in self.file_reader:
-        #     print(frame.shape)
-        #     output: numpy.array = self.__get_prediction(frame)
-        #     vid_output: numpy.array = self.__transform_output(output, frame)
+        for timestamp, detec in tracker:
+            # print(detections)
+            
+            # detections = trac
+            print(detec, streamer.detections)
 
-        #     print(vid_output.shape)
-        #     if self.configuration.visualize:
-        #         self.__visualize_output(frame, output)
+            # frame = frame_reader.frame
+            # pixels = copy(frame.pixels)
+
+            # Plot output
+        #     image = Image.fromarray(pixels)
+        #     image = draw_detections(image, detections)
+        #     image = draw_tracks(image, tracks)
+        #     ax3.axes.xaxis.set_visible(False)
+        #     ax3.axes.yaxis.set_visible(False)
+        #     fig3.tight_layout()
+        #     artist = ax3.imshow(image, animated=True)
+        #     artists3.append([artist])
+        # ani3 = animation.ArtistAnimation(fig3, artists3, interval=20, blit=True, repeat_delay=200)
 
     def __transform_output(
         self, output: numpy.array, input: numpy.array

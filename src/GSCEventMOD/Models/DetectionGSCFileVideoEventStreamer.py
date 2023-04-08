@@ -12,6 +12,7 @@ import numpy
 import dv
 import sys
 import json
+from stonesoup.types.detection import Detection
 
 
 class DetectionGSCFileVideoEventStreamer(DetectionReader):
@@ -40,34 +41,32 @@ class DetectionGSCFileVideoEventStreamer(DetectionReader):
         height, width = DetectionGSCFileVideoEventStreamer.get_image_size(configuration)
         
         with dv.AedatFile(configuration.aedat_file_reader_config.path) as aedat_file:
-            detections = set()
             
             for event_frame in aedat_file["events"].numpy():
                 
-                events: typing.List[numpy.array] = []
-                
-                num_grouped_events: int = configuration.model_parameters.num_grouped_events
                 
                 event = DetectionGSCFileVideoEventStreamer.process_event(event_frame)
                 
                 input_image = DetectionGSCFileVideoEventStreamer.get_event_image(event_frame, height, width)
                 
-                spectral_labels = model.cluster(event, input_image)
+                spectral_labels, bounding_boxes = model.cluster(event, input_image)
                 
+                detection_set: typing.Set[Detection] = self.__detection_processor(bounding_boxes)
                 # image = GSCEventMOD.convert_spectral_to_image(event, spectral_labels, height, width)
                 fig, axes = plt.subplots(nrows=1, ncols=3)
                 
                 axes[0].imshow(spectral_labels[0])
                 axes[1].imshow(spectral_labels[1])
+                # axes[2].imshow(spectral_labels[2])
+                # axes[3].imshow(spectral_labels[3])
                 axes[2].imshow(input_image)
                 # plt.imshow(image)
                 # plt.imshow(input_image)
                 plt.show()
-                # Visualizer.visualize(image, "test")
                 
                 
                 
-                yield datetime.datetime.now(), model.cluster(event)
+                yield datetime.datetime.now(), detection_set
     
     @staticmethod
     def get_image_size(configuration: Configuration):
@@ -90,14 +89,13 @@ class DetectionGSCFileVideoEventStreamer(DetectionReader):
                 
                 image[y][x] =  255
         
-        print('image-->', image.shape)
         return image
     
     @staticmethod
     def process_event(frame: numpy) -> numpy:        
         event = []
         
-        for index, packet in enumerate(frame):    
+        for _, packet in enumerate(frame):    
             
             if (packet[3] != 1):
                 continue
@@ -107,3 +105,13 @@ class DetectionGSCFileVideoEventStreamer(DetectionReader):
         event_numpy = numpy.array(event)
                 
         return event_numpy
+
+    def __detection_processor(self, bounding_boxes: typing.List[typing.List]) -> typing.Set[Detection]:
+        detection_set: typing.Set[Detection] = set()
+        
+        for box in bounding_boxes:
+            detection: Detection = Detection(box, timestamp=datetime.datetime.now())
+            
+            detection_set.add(detection)
+            
+        return detection_set
