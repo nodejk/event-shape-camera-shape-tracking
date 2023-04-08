@@ -22,6 +22,7 @@ import importlib
 
 class Pipeline:
     configuration: Configuration
+    # AEDAT is data format for Dynamic Visions camera footage
     file_reader: AedatFileReader
     video_streamer: VideoStreamer
     data_processors: typing.List[BaseDataProcessor]
@@ -43,6 +44,7 @@ class Pipeline:
         # self.__create_new_session()
         # self.__save_configuration()
 
+        # Load the pipeline time predefined in the config file
         match configuration.pipeline_type:
             case PipelineEnum.REAL_TIME.value:
                 return self.__real_time()
@@ -53,26 +55,33 @@ class Pipeline:
             case _:
                 raise Exception("Pipeline Type not found")
 
+    # 
     def __create_new_session(self) -> None:
+        # Create a hash using SHA1 from current timestamp (random hash pretty much)
         current_timestamp: str = datetime.now().isoformat()
         hash_digest: str = hashlib.sha1(str.encode(current_timestamp)).hexdigest()[0:10]
 
+        # Combine sessions directory path with random hash
         session_path: str = os.path.join(
             self.get_session_parent_absolute_path, hash_digest
         )
 
+        # If the path generated using the random hash is a non-existent directory path
+        # create this directory path in session, e.g. f91c19f5f2
         if os.path.isdir(session_path) != True:
             os.mkdir(session_path)
             self.session_path = session_path
         else:
             raise Exception("Session {} already exists".format(session_path))
 
+    # Saves the configuration file to the config.json in the main directory of the project
     def __save_configuration(self) -> None:
         configuration_path: str = os.path.join(self.session_path, "config.json")
 
         with open(configuration_path, "w") as file_pointer:
             file_pointer.write(self.configuration.json())
 
+    # Get the directory path from where this file is stored + "Sessions" to generate Sessions directory path
     @property
     def get_session_parent_absolute_path(self) -> None:
         return os.path.join(
@@ -82,10 +91,15 @@ class Pipeline:
     def __find_optimal_parameters(self) -> None:
         return
 
+    # Gets the data processor which is necessary to load training data for a certain model
+    # This one contains a cropping and noise filtering step
     def __get_data_processors(self) -> typing.List[BaseDataProcessor]:
+        # Initialize as BaseDataProcessor, used for SQL operations
         data_processors: typing.List[BaseDataProcessor] = []
 
+        # For every predefined step in the config file
         for processor_config in self.configuration.data_processors.steps:
+            # Import the actual data processor and return it
             processor: BaseDataProcessor = importlib.import_module(
                 f"src.DataProcessors.{processor_config.name}"
             ).DataProcessor(
@@ -97,6 +111,8 @@ class Pipeline:
 
         return data_processors
 
+    # Gets the data transformer which is necessary to load training data for a certain model
+    # This one contains a normalization step
     def __get_data_transformers(self) -> typing.List[BaseDataTransformer]:
         data_transformers: typing.List[BaseDataTransformer] = []
 
@@ -112,15 +128,20 @@ class Pipeline:
 
         return data_transformers
 
+    # Load the GSCEventMOD model, used for clustering event data
     def __get_model(self) -> GSCEventMOD:
         return GSCEventMOD(
             model_name=self.configuration.model,
             **self.configuration.model_parameters.parameters,
         )
 
+    # Get the AEDAT format file reader
+    # AEDAT is the file format the Dynamic Vision camera stores event data in
     def __get_file_reader(self) -> None:
         return AedatFileReader(path=self.configuration.aedat_file_reader_config.path)
 
+    # Use the data processor, probably previously loaded using __get_data_processors, to process the input training data
+    # Currently uses 2 steps:  cropping and noise filtering
     def __get_processed_data(self, input: numpy.array) -> None:
         output: numpy.array = input
 
@@ -128,7 +149,9 @@ class Pipeline:
             output = processor.process_data(output)
 
         return output
-
+    
+    # Use the data transfomer, probably previously loaded using __get_data_transformers, to transform the input training data
+    # Currently uses normalization
     def __get_transformed_data(self, input: numpy.array) -> None:
         output: numpy.array = input
 
@@ -136,7 +159,9 @@ class Pipeline:
             output = transformer.transform(output)
 
         return output
-
+    
+    # Get the video stream from the predefined addres and port using the predefined model configurations
+    # Predefinitions are mostly in config.json
     def __get_video_streamer(self) -> DetectionGSCLiveVideoEventStreamer:
         return DetectionGSCLiveVideoEventStreamer(
             address=self.configuration.detection_gsc_event_reader_config.address,
@@ -144,9 +169,12 @@ class Pipeline:
             model_configurations=self.configuration.model_parameters,
         )
 
+    # Get the streamer function for reading a event data video file
     def __get_file_streamer(self) -> DetectionGSCFileVideoEventStreamer:
         return DetectionGSCFileVideoEventStreamer()
 
+    # Not finished yet
+    # should use the Kalman filtering technique to predict the next video frame given the current (and previous) frames
     def __step_prediction(self) -> None:
         streamer: DetectionGSCFileVideoEventStreamer = self.__get_file_streamer()
 
@@ -166,11 +194,13 @@ class Pipeline:
         #     if self.configuration.visualize:
         #         self.__visualize_output(frame, output)
 
+    # 
     def __transform_output(
         self, output: numpy.array, input: numpy.array
     ) -> numpy.array:
         points = numpy.asarray(
             [
+                # numpy.where(condition, [x, y, ]/) returns elements chosen from x or y depending on condition
                 input[:][0][numpy.where(output == 1, True, False)],
                 input[:][1][numpy.where(output == 1, True, False)],
             ]
