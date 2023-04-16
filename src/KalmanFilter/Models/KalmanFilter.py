@@ -16,7 +16,7 @@ from stonesoup.types.state import GaussianState
 from stonesoup.types.array import CovarianceMatrix, StateVector
 from stonesoup.initiator.simple import MultiMeasurementInitiator
 from stonesoup.deleter.time import UpdateTimeStepsDeleter
-from stonesoup.dataassociator.neighbour import GNNWith2DAssignment
+from stonesoup.dataassociator.neighbour import GlobalNearestNeighbour
 from stonesoup.tracker.simple import MultiTargetTracker
 
 
@@ -24,7 +24,6 @@ class KalmanFilter:
     tracker: MultiTargetTracker
 
     def __init__(self, detector: DetectionReader) -> None:
-
         transition_model = CombinedLinearGaussianTransitionModel(
             KalmanFilter.get_transition_models()
         )
@@ -36,7 +35,7 @@ class KalmanFilter:
         predictor: KalmanPredictor = KalmanPredictor(transition_model)
         updater: KalmanUpdater = KalmanUpdater(measurement_model)
 
-        hypothesiser = DistanceHypothesiser(predictor, updater, Mahalanobis(), 10)
+        hypothesiser = DistanceHypothesiser(predictor, updater, Mahalanobis(), 1)
 
         prior_state = GaussianState(
             StateVector(numpy.zeros((6, 1))),
@@ -47,7 +46,7 @@ class KalmanFilter:
 
         deleter_init = UpdateTimeStepsDeleter(time_steps_since_update=3)
 
-        data_associator = GNNWith2DAssignment(hypothesiser)
+        data_associator = GlobalNearestNeighbour(hypothesiser)
 
         initiator = MultiMeasurementInitiator(
             prior_state,
@@ -55,10 +54,10 @@ class KalmanFilter:
             data_associator,
             updater,
             measurement_model,
-            min_points=10,
+            min_points=2,
         )
 
-        deleter = UpdateTimeStepsDeleter(time_steps_since_update=15)
+        deleter = UpdateTimeStepsDeleter(time_steps_since_update=30)
 
         self.tracker = MultiTargetTracker(
             initiator=initiator,
@@ -71,10 +70,10 @@ class KalmanFilter:
     @staticmethod
     def get_transition_models() -> typing.List[ConstantNthDerivative]:
         return [
-            ConstantVelocity(20**2),
-            ConstantVelocity(20**2),
-            RandomWalk(20**2),
-            RandomWalk(20**2),
+            ConstantVelocity(3**2),
+            ConstantVelocity(3**2),
+            RandomWalk(3**2),
+            RandomWalk(3**2),
         ]
 
     @staticmethod

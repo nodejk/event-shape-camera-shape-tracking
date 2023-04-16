@@ -1,35 +1,36 @@
+import functools
+
 from src.Models.EventCamera import EventCamera
 from sklearn.neighbors import kneighbors_graph, NearestNeighbors
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import SpectralClustering
-from sklearn.feature_extraction import image
 import numpy
 from scipy import ndimage
+from stonesoup.types.sensordata import ImageFrame
 import pydantic
 import typing
 from src.Enums.ModelModeEnum import ModelModeEnum
+from stonesoup.types.detection import Detection
+from src.Utils.bounding_box import non_max_suppression
 
 
 class GSCEventMOD(EventCamera):
+    model_name = "GSC_EVENT_MOD"
+
     num_neighbors: int
     mode: ModelModeEnum
 
-    # typing.Optional(X) encourages those variables to be X, otherwise they are type None
-    # All threes values are set in config file
-    # Minimum number of clusters
     min_num_clusters: typing.Optional[int] = None
-    # Maximum number of clusters
     max_num_clusters: typing.Optional[int] = None
-    # Actual number of clusters
+
     num_clusters: typing.Optional[int] = None
 
-    #suggestion: maybe replace with math.inf, but depends on Python version
-    #otherwise, try: (inf = float('inf')) except: inf = <high value, e.g. 1e3000> 
     max_score: float = float("infinity")
     optimal_clusters: int = 0
 
-    # Checks if max_num_clusters, min_num_clusters and num_clusters are set
-    # Pydantic is library used for data validation/settings management
+    non_max_suppression: bool
+    non_max_suppression_threshold: float
+
     @pydantic.root_validator()
     @classmethod
     def validate_mode(cls, field_values):
@@ -53,116 +54,108 @@ class GSCEventMOD(EventCamera):
     def __init_subclass__(cls) -> None:
         return super().__init_subclass__()
 
-    # Not implemented yet
     def predict(self, input: numpy.array) -> None:
         raise NotImplemented("predict not implemented")
 
-    # Not implemented yet
     def init_new_model(self) -> None:
         raise Exception("Not Implemented")
 
-    # Not implemented yet
     def load_from_snapshot(self) -> None:
         raise Exception("Not Implemented")
 
-    # 
     def find_optimal_parameters(self, input: numpy.array) -> numpy.array:
-        allClusters: typing.List[numpy.array] = []
-        allScores: typing.List[float] = []
+        all_clusters: typing.List[numpy.array] = []
+        all_scores: typing.List[float] = []
 
-        # Takes input, clusters them, then checks if clusters are correct
-        # Assigns input to most optimal clusters afterwards
         for cluster in range(self.min_num_clusters, self.max_num_clusters):
             clustering: numpy.array = self.__cluster(input, cluster)
 
-            allClusters.append(clustering)
+            all_clusters.append(clustering)
 
             current_silhouette_score: float = self.calculate_silhouette_score(
                 input, clustering
             )
-            allScores.append(current_silhouette_score)
+            all_scores.append(current_silhouette_score)
 
             if current_silhouette_score > self.max_score:
                 self.max_score = current_silhouette_score
                 self.optimal_clusters = cluster
 
     def cluster(
-        self, input_events: numpy.array, input_image: numpy.array
+        self, input_events: numpy.array, image_frame: ImageFrame
     ) -> numpy.array:
         if self.num_clusters is None:
             raise Exception("Parameter num_cluster is None")
 
-        return self.__cluster(input_events, self.num_clusters, input_image)
+        return self.__cluster(input_events, image_frame)
 
-    # Not implemented yet
     def cluster_kalman(self, data: numpy):
         return
 
+    @staticmethod
+    @functools.lru_cache(maxsize=None)
     def spectral_clustering(
-        self,
+        num_clusters: int,
+        num_neighbors: int,
     ) -> SpectralClustering:
-        """_summary_
-        Returns:
-            SpectralClustering: _description_
-        """
         return SpectralClustering(
-            n_clusters=self.num_clusters,
+            n_clusters=num_clusters,
             random_state=0,
             affinity="precomputed_nearest_neighbors",
-            n_neighbors=self.num_neighbors,
+            n_neighbors=num_neighbors,
             assign_labels="kmeans",
             n_jobs=-1,
         )
 
-    def nearest_neighbors(self, events: numpy.array) -> NearestNeighbors:
+    def nearest_neighbors(self, events: numpy.ndarray) -> NearestNeighbors:
         return kneighbors_graph(
             events,
-            # num_neighbors is predefined
             n_neighbors=self.num_neighbors,
-        )
-    def build_graph(self, event_image: numpy.array):
-        # takes image as 2d-array as input (3d with color), extracts patches, 
-        # creates weighting matrix which shows which samples (pixels) are connected\
-        # img_to_graph returns pixel-to-pixel gradient connections, edges are weighted gradient values
-        return image.img_to_graph(
-            event_image,
         )
 
     def __cluster(
-        self, input_events: numpy.array, num_cluster: int, input_image: numpy.array
-    ) -> typing.List[numpy.array]:
-        
+        self, input_events: numpy.array, image_frame: ImageFrame
+    ) -> typing.Tuple[typing.List[numpy.ndarray], typing.Set[Detection]]:
+
+        input_image: numpy = image_frame.pixels
         image_height, image_width = input_image.shape[0], input_image.shape[1]
+
+        # if numpy.unique(input_events).shape[0] == 0:
+        #     return [], set()
 
         adjacency_matrix = self.nearest_neighbors(input_events)
 
-        spectral_labels: numpy = self.spectral_clustering().fit_predict(
-            adjacency_matrix
-        )
+        spectral_labels: numpy = GSCEventMOD.spectral_clustering(
+            self.num_clusters,
+            self.num_neighbors
+        ).fit_predict(adjacency_matrix)
+
         spectral_labels = numpy.expand_dims(spectral_labels, axis=1)
 
         output_labels: numpy.array = self.__convert_spectral_to_image(
             input_events, spectral_labels, image_height, image_width
         )
 
-        detections, bounding_boxes = self.retrieve_bounding_boxes(
-            output_labels, input_image
-        )
+        if self.non_max_suppression is False:
+            return self.__retrieve_bounding_boxes(
+                output_labels, image_frame
+            )
+        else:
+            return self.__retrieve_non_overlapping_bounding_boxes(
+                output_labels, image_frame
+            )
 
-        return detections, bounding_boxes
-
-    # Pretty much just sklearn.metrics.silhouette_score()
-    # Used to identify if sample is part of right cluster
     def calculate_silhouette_score(
         self, data: numpy.array, clustering: numpy.array
     ) -> float:
         return silhouette_score(data, clustering)
 
-    def retrieve_bounding_boxes(
-        self, output_labels: numpy.array, input_image: numpy
-    ) -> typing.List[numpy.array]:
-        detections = []
-        bounding_boxes = []
+    def __retrieve_bounding_boxes(
+        self, output_labels: numpy.ndarray, image_frame: ImageFrame
+    ) -> typing.Tuple[typing.List[numpy.ndarray], typing.Set[Detection]]:
+
+        detections: typing.Set[Detection] = set()
+        bounding_boxes: typing.List[numpy.ndarray] = []
 
         for label in range(self.num_clusters):
             slice_x, slice_y = ndimage.find_objects(output_labels == label)[0]
@@ -170,12 +163,65 @@ class GSCEventMOD(EventCamera):
             width: int = slice_x.stop - slice_x.start
             height: int = slice_y.stop - slice_y.start
 
-            roi = input_image[slice_x, slice_y]
+            roi = image_frame.pixels[slice_x, slice_y]
 
-            detections.append(roi)
-            bounding_boxes.append([slice_x.start, slice_y.start, width, height])
+            bounding_boxes.append(roi)
+            detection: Detection = Detection(
+                [slice_x.start, slice_y.start, width, height],
+                timestamp=image_frame.timestamp,
+            )
 
-        return detections, bounding_boxes
+            detections.add(detection)
+
+        return bounding_boxes, detections
+
+    def __retrieve_non_overlapping_bounding_boxes(
+            self, output_labels: numpy.ndarray, image_frame: ImageFrame
+    ) -> typing.Tuple[typing.List[numpy.ndarray], typing.Set[Detection]]:
+
+        bounding_boxes_corners: numpy.ndarray = self.__get_bounding_boxes_corners(output_labels)
+
+        non_overlapping_bounding_boxes: numpy.ndarray = non_max_suppression(bounding_boxes_corners)
+
+        detections: typing.Set[Detection] = set()
+        bounding_boxes: typing.List[numpy.ndarray] = []
+
+        for box in non_overlapping_bounding_boxes:
+            x_start, y_start, x_stop, y_stop = box[0], box[1], box[2], box[3]
+
+            width: int = x_stop - x_start
+            height: int = y_stop - y_start
+
+            roi = image_frame.pixels[x_start: x_stop, y_start: y_stop]
+
+            bounding_boxes.append(roi)
+            detection: Detection = Detection(
+                [x_start, y_start, width, height],
+                timestamp=image_frame.timestamp,
+            )
+
+            detections.add(detection)
+
+        return bounding_boxes, detections
+
+    def __get_bounding_boxes_corners(self, output_labels: numpy.ndarray) -> numpy.ndarray:
+        """
+
+        Parameters
+        ----------
+        output_labels
+
+        Returns
+        -------
+
+        """
+        bounding_boxes: typing.List[typing.List] = []
+
+        for label in range(self.num_clusters):
+            slice_x, slice_y = ndimage.find_objects(output_labels == label)[0]
+            bounding_boxes.append([slice_x.start, slice_y.start, slice_x.stop, slice_y.stop])
+
+        return numpy.array(bounding_boxes)
 
     def __convert_spectral_to_image(
         self, input_event: numpy, spectral_labels: numpy, height: int, width: int
@@ -183,7 +229,7 @@ class GSCEventMOD(EventCamera):
         output_image: numpy.array = numpy.full((height, width), -1).astype(numpy.uint8)
 
         for i in range(spectral_labels.shape[0]):
-            y, x = input_event[i][0], input_event[i][1]
+            y, x = input_event[i][1], input_event[i][0]
 
             label = spectral_labels[i][0]
 

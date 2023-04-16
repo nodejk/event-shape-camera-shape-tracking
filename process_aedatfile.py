@@ -1,4 +1,4 @@
-from src.Models.AedatFileReader import AedatFileReader
+from src.Models.AedatFileFrameReader import AedatFileFrameReader
 from datetime import datetime
 import os
 from src.Models.Visualizer import Visualizer
@@ -20,10 +20,8 @@ if __name__ == '__main__':
     path = "C:/Users/Krishna/event-camera/dvSave-2022_11_29_19_14_39.aedat4"
     # path: str = 'C:/Users/Krishna/Downloads/Raw_AEDAT4_Files/Cars_sequence.aedat4'
 
-    reader: AedatFileReader = AedatFileReader(
+    reader: AedatFileFrameReader = AedatFileFrameReader(
         path=path,
-        height=0,
-        width=0,
     )
 
     count = 0
@@ -40,4 +38,3 @@ if __name__ == '__main__':
 
     print(count / (end_time - start_time))
 
-    pass

@@ -10,8 +10,10 @@
             "min_num_clusters": 2,
             "max_num_clusters": 6,
             "num_neighbors": 30,
-            "num_clusters": 2,
-            "mode": "find-optimal-clusters"
+            "num_clusters": 3,
+            "mode": "find-optimal-clusters",
+            "non_max_suppression": false,
+            "non_max_suppression_threshold": 0.1
         }
     },
     "aedat_file_reader_config": {
@@ -19,39 +21,27 @@
     },
     "visualize": true,
     "data_processors": {
-        "class_balanced_split": "",
-        "data_input_path": "/Users/krishnasharma/Desktop/model_data",
-        "train_validation_test_split": {
-            "train_percentage": 60,
-            "validation_percentage": 30,
-            "test_percentage": 10
-        },
-        "steps": [{
-                "name": "crop",
-                "parameters": {
-                    "x_left": 0,
-                    "x_right": 10,
-                    "y_top": 100,
-                    "y_bottom": 200
-                }
-            },
+        "steps": [
             {
-                "name": "noise_filter",
+                "name": "median_filter",
                 "parameters": {
-                    "load_model": false,
-                    "model_path": "./",
-                    "random_state": 10,
-                    "n_jobs": -1,
-                    "contamination": 10
+                    "size": 1
                 }
             }
         ]
     },
-    "data_transformers": [{
-        "name": "normalize",
-        "parameters": {
-            "output_range_min": 0,
-            "output_range_max": 10
-        }
-    }]
+    "event_data_processors": {
+        "steps": [
+            {
+                "name": "isolation_forest",
+                "parameters": {
+                    "random_state": 0,
+                    "contamination": 0.3
+                }
+            }
+        ]
+    },
+    "data_transformers": {
+        "steps": []
+    }
 }

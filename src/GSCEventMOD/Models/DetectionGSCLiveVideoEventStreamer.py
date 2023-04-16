@@ -5,7 +5,8 @@ import dv
 import numpy
 import typing
 
-# 
+
+#
 class DetectionGSCLiveVideoEventStreamer(DetectionReader):
     address: str
     port: int
@@ -21,13 +22,13 @@ class DetectionGSCLiveVideoEventStreamer(DetectionReader):
 
     # Initialize the Model as GSCEventMOD if it wasnt initialized before, using the configurations from config file
     def get_model(self) -> GSCEventMOD:
-        if DetectionGSCLiveVideoEventStreamer.model == None:
+        if DetectionGSCLiveVideoEventStreamer.model is None:
             DetectionGSCLiveVideoEventStreamer.model = GSCEventMOD(
                 self.model_configurations
             )
         return DetectionGSCLiveVideoEventStreamer.model
 
-    # 
+    #
     @BufferedGenerator.generator_method
     def detections_gen(self):
         # Get the live video stream, using the defined address and port
@@ -36,12 +37,9 @@ class DetectionGSCLiveVideoEventStreamer(DetectionReader):
         ) as stream:
             model: GSCEventMOD = DetectionGSCLiveVideoEventStreamer.model
 
-            # Process every frame in the stream
             for event_frame in stream:
                 event = DetectionGSCLiveVideoEventStreamer.process_event(event_frame)
-                # Call clustering function from GSCEventMOD for every frame given the events from the frame
                 yield model.cluster(event)
-
 
     # Gets events from every frame, returns the collected events array
     @staticmethod

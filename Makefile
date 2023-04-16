@@ -1,11 +1,11 @@
-app_src = src
+app_src = ./src
 all_src = $(app_src)
 
-test = python3.9 -m unittest discover -s ./tests -p '*Test.py' -v
-autoflake = autoflake -r --in-place --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports $(all_src)
+test = python3 -m unittest discover -s ./tests -p '*Test.py' -v
+autoflake = python3 -m autoflake -r --in-place --remove-all-unused-imports --remove-unused-variables --ignore-init-module-imports $(all_src)
 mypy_base = mypy --show-error-codes
 mypy = $(mypy_base) $(all_src)
-black = black $(all_src)
+black = python3 -m black $(all_src)
 
 .PHONY: all
 all: static test

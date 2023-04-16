@@ -16,13 +16,13 @@ class EventCamera(pydantic.BaseModel):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def cluster(self, **data: typing.Any) -> numpy.array:
+    def cluster(self, **kwargs: typing.Any) -> numpy.array:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def load_from_snapshot(self, epochToRestoreFrom: str) -> None:
+    def load_from_snapshot(self, epoch_to_restore_from: str) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def init_new_model(self, initParameters) -> None:
+    def init_new_model(self, init_parameters) -> None:
         raise NotImplementedError
