@@ -1,5 +1,4 @@
 from typing import List
-import os
 from pydantic.dataclasses import dataclass
 import pydantic
 import typing
@@ -13,8 +12,6 @@ class ModelRestoreParameters:
 
 @dataclass
 class ModelParametersConfig:
-    restore_model: bool
-    num_grouped_events: int
     parameters: dict
 
 
@@ -42,8 +39,9 @@ class DataTransformerConfig:
 
 
 @dataclass
-class AedatFileReaderConfig:
-    path: str
+class EventInputConfig:
+    source_type: str
+    parameters: typing.Dict[str, str]
 
 
 @dataclass
@@ -52,13 +50,22 @@ class DetectionGSCEventStreamerConfig:
     port: str
 
 
+@dataclass
+class ModelOutputConfig:
+    save: bool
+
+
 class Configuration(pydantic.BaseModel):
     model: str
     pipeline_type: str
-    aedat_file_reader_config: AedatFileReaderConfig
+    events_input: EventInputConfig
+    model_output: ModelOutputConfig
     detection_gsc_event_reader_config: typing.Optional[DetectionGSCEventStreamerConfig]
     visualize: bool
     model_parameters: ModelParametersConfig
     data_processors: DataProcessorConfig
     event_data_processors: DataProcessorConfig
     data_transformers: DataTransformerConfig
+
+    class Config:
+        use_enum_values = True

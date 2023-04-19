@@ -36,7 +36,9 @@ class AedatFileFrameReader(FrameReader):
 
                 processed_events = self.event_data_processors_steps.run(input_events)
 
-                (image, timestamp) = convert_event_frame_to_image(processed_events, height, width)
+                (image, timestamp) = convert_event_frame_to_image(
+                    processed_events, height, width
+                )
 
                 processed_image: numpy.ndarray = self.data_transformers_steps.run(image)
                 processed_image = self.data_processors_steps.run(processed_image)

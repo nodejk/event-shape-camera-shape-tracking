@@ -22,7 +22,6 @@ def convert_image_to_event(image: numpy) -> numpy.ndarray:
 def convert_event_frame_to_image(
     event_frame: numpy.ndarray, height: int, width: int
 ) -> typing.Tuple[numpy.ndarray, datetime.datetime]:
-
     image: numpy = numpy.full((height, width), 0).astype(numpy.uint8)
     timestamp: datetime.datetime = datetime.datetime.now()
 
@@ -45,16 +44,17 @@ def convert_event_frame_to_image(
 def convert_packets_to_events(
     input_packets: numpy.ndarray,
 ) -> numpy.ndarray:
-
     events: typing.List[typing.List] = []
 
     for packet in input_packets:
-        events.append([
-            packet[1],
-            packet[2],
-            packet[0] / 1_000,
-            packet[3],
-        ])
+        events.append(
+            [
+                packet[1],
+                packet[2],
+                packet[0] / 1_000,
+                packet[3],
+            ]
+        )
 
     return numpy.array(events)
 

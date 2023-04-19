@@ -4,12 +4,8 @@ import numpy
 import typing
 
 
-class EventCamera(pydantic.BaseModel):
+class ClusteringModel(pydantic.BaseModel):
     model_name: str
-
-    @abc.abstractmethod
-    def predict(self, input: numpy.array) -> None:
-        raise NotImplementedError
 
     @abc.abstractmethod
     def find_optimal_parameters(self, input: numpy.array) -> None:
@@ -20,9 +16,5 @@ class EventCamera(pydantic.BaseModel):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def load_from_snapshot(self, epoch_to_restore_from: str) -> None:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def init_new_model(self, init_parameters) -> None:
+    def load_from_snapshot(self, session_to_restore_from: str) -> None:
         raise NotImplementedError

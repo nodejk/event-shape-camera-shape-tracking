@@ -1,6 +1,6 @@
 import functools
 
-from src.Models.EventCamera import EventCamera
+from src.Models.ClusteringModel import ClusteringModel
 from sklearn.neighbors import kneighbors_graph, NearestNeighbors
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import SpectralClustering
@@ -14,7 +14,7 @@ from stonesoup.types.detection import Detection
 from src.Utils.bounding_box import non_max_suppression
 
 
-class GSCEventMOD(EventCamera):
+class GSCEventMOD(ClusteringModel):
     model_name = "GSC_EVENT_MOD"
 
     num_neighbors: int
@@ -57,10 +57,7 @@ class GSCEventMOD(EventCamera):
     def predict(self, input: numpy.array) -> None:
         raise NotImplemented("predict not implemented")
 
-    def init_new_model(self) -> None:
-        raise Exception("Not Implemented")
-
-    def load_from_snapshot(self) -> None:
+    def load_from_snapshot(self, session_to_restore_from: str) -> None:
         raise Exception("Not Implemented")
 
     def find_optimal_parameters(self, input: numpy.array) -> numpy.array:
@@ -116,7 +113,6 @@ class GSCEventMOD(EventCamera):
     def __cluster(
         self, input_events: numpy.array, image_frame: ImageFrame
     ) -> typing.Tuple[typing.List[numpy.ndarray], typing.Set[Detection]]:
-
         input_image: numpy = image_frame.pixels
         image_height, image_width = input_image.shape[0], input_image.shape[1]
 
@@ -126,8 +122,7 @@ class GSCEventMOD(EventCamera):
         adjacency_matrix = self.nearest_neighbors(input_events)
 
         spectral_labels: numpy = GSCEventMOD.spectral_clustering(
-            self.num_clusters,
-            self.num_neighbors
+            self.num_clusters, self.num_neighbors
         ).fit_predict(adjacency_matrix)
 
         spectral_labels = numpy.expand_dims(spectral_labels, axis=1)
@@ -137,9 +132,7 @@ class GSCEventMOD(EventCamera):
         )
 
         if self.non_max_suppression is False:
-            return self.__retrieve_bounding_boxes(
-                output_labels, image_frame
-            )
+            return self.__retrieve_bounding_boxes(output_labels, image_frame)
         else:
             return self.__retrieve_non_overlapping_bounding_boxes(
                 output_labels, image_frame
@@ -153,7 +146,6 @@ class GSCEventMOD(EventCamera):
     def __retrieve_bounding_boxes(
         self, output_labels: numpy.ndarray, image_frame: ImageFrame
     ) -> typing.Tuple[typing.List[numpy.ndarray], typing.Set[Detection]]:
-
         detections: typing.Set[Detection] = set()
         bounding_boxes: typing.List[numpy.ndarray] = []
 
@@ -176,12 +168,15 @@ class GSCEventMOD(EventCamera):
         return bounding_boxes, detections
 
     def __retrieve_non_overlapping_bounding_boxes(
-            self, output_labels: numpy.ndarray, image_frame: ImageFrame
+        self, output_labels: numpy.ndarray, image_frame: ImageFrame
     ) -> typing.Tuple[typing.List[numpy.ndarray], typing.Set[Detection]]:
+        bounding_boxes_corners: numpy.ndarray = self.__get_bounding_boxes_corners(
+            output_labels
+        )
 
-        bounding_boxes_corners: numpy.ndarray = self.__get_bounding_boxes_corners(output_labels)
-
-        non_overlapping_bounding_boxes: numpy.ndarray = non_max_suppression(bounding_boxes_corners)
+        non_overlapping_bounding_boxes: numpy.ndarray = non_max_suppression(
+            bounding_boxes_corners
+        )
 
         detections: typing.Set[Detection] = set()
         bounding_boxes: typing.List[numpy.ndarray] = []
@@ -192,7 +187,7 @@ class GSCEventMOD(EventCamera):
             width: int = x_stop - x_start
             height: int = y_stop - y_start
 
-            roi = image_frame.pixels[x_start: x_stop, y_start: y_stop]
+            roi = image_frame.pixels[x_start:x_stop, y_start:y_stop]
 
             bounding_boxes.append(roi)
             detection: Detection = Detection(
@@ -204,7 +199,9 @@ class GSCEventMOD(EventCamera):
 
         return bounding_boxes, detections
 
-    def __get_bounding_boxes_corners(self, output_labels: numpy.ndarray) -> numpy.ndarray:
+    def __get_bounding_boxes_corners(
+        self, output_labels: numpy.ndarray
+    ) -> numpy.ndarray:
         """
 
         Parameters
@@ -219,7 +216,9 @@ class GSCEventMOD(EventCamera):
 
         for label in range(self.num_clusters):
             slice_x, slice_y = ndimage.find_objects(output_labels == label)[0]
-            bounding_boxes.append([slice_x.start, slice_y.start, slice_x.stop, slice_y.stop])
+            bounding_boxes.append(
+                [slice_x.start, slice_y.start, slice_x.stop, slice_y.stop]
+            )
 
         return numpy.array(bounding_boxes)
 

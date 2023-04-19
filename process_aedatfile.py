@@ -1,4 +1,4 @@
-from src.Models.AedatFileFrameReader import AedatFileFrameReader
+from src.Models.FrameReaders.AedatFileFrameReader import AedatFileFrameReader
 from datetime import datetime
 import os
 from src.Models.Visualizer import Visualizer
