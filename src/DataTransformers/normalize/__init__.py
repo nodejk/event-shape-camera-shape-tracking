@@ -9,5 +9,5 @@ class DataTransformer(BaseDataTransformer):
     def __init_subclass__(cls) -> None:
         return super().__init_subclass__()
 
-    def transform(self, input: numpy.array) -> None:
-        return input
+    def transform(self, input_image: numpy.ndarray) -> numpy.ndarray:
+        return input_image

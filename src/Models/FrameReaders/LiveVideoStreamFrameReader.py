@@ -3,7 +3,7 @@ from stonesoup.reader.base import FrameReader
 from stonesoup.types.sensordata import ImageFrame
 from stonesoup.base import Property
 from stonesoup.buffered_generator import BufferedGenerator
-from src.Utils.event import convert_event_frame_to_image, convert_packets_to_events
+from src.Utils.EventsUtils import EventsUtils
 import dv
 from src.DataProcessors import DataProcessorSteps
 from src.DataTransformers import DataTransformerSteps
@@ -34,13 +34,13 @@ class LiveVideoStreamFrameReader(FrameReader):
         with dv.NetworkNumpyEventPacketInput(
             address=self.address, port=self.port
         ) as stream:
-            input_events: numpy.ndarray = convert_packets_to_events(stream)
+            input_events: numpy.ndarray = EventsUtils.convert_packets_to_events(stream)
 
             processed_events: numpy.ndarray = self.event_data_processors_steps.run(
                 input_events
             )
 
-            (image, timestamp) = convert_event_frame_to_image(
+            (image, timestamp) = EventsUtils.convert_event_frame_to_image(
                 processed_events,
                 height=self.height,
                 width=self.width,

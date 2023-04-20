@@ -1,4 +1,4 @@
-app_src = ./src
+app_src = src
 all_src = $(app_src)
 
 test = python3 -m unittest discover -s ./tests -p '*Test.py' -v

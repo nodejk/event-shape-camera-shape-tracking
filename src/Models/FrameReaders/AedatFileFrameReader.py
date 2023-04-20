@@ -3,7 +3,7 @@ from stonesoup.reader.base import FrameReader
 from stonesoup.types.sensordata import ImageFrame
 from stonesoup.base import Property
 from stonesoup.buffered_generator import BufferedGenerator
-from src.Utils.event import convert_event_frame_to_image, convert_packets_to_events
+from src.Utils.EventsUtils import EventsUtils
 import dv
 import typing
 from src.DataProcessors import DataProcessorSteps
@@ -32,11 +32,11 @@ class AedatFileFrameReader(FrameReader):
 
         with dv.AedatFile(self.file_path) as aedat_file:
             for packet in aedat_file["events"].numpy():
-                input_events: numpy.ndarray = convert_packets_to_events(packet)
+                input_events: numpy.ndarray = EventsUtils.convert_packets_to_events(packet)
 
                 processed_events = self.event_data_processors_steps.run(input_events)
 
-                (image, timestamp) = convert_event_frame_to_image(
+                (image, timestamp) = EventsUtils.convert_event_frame_to_image(
                     processed_events, height, width
                 )
 

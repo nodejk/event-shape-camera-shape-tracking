@@ -24,20 +24,20 @@ def current_time_stamp(name: str) -> str:
 
 @functools.lru_cache(10)
 def convert_seconds_to_timestamp(
-    timestamp_second: numpy.int64,
+    timestamp_second: float,
 ) -> datetime.datetime:
     return datetime.datetime.fromtimestamp(timestamp_second)
 
 
 @functools.lru_cache(10)
 def convert_micro_seconds_to_milli_seconds(
-    timestamp_micro_second: numpy.int64,
-) -> int:
+    timestamp_micro_second: float,
+) -> float:
     return timestamp_micro_second / 1_000
 
 
 @functools.lru_cache(10)
 def convert_milli_second_to_seconds(
-    timestamp_milli_second: numpy.int64,
-) -> int:
+    timestamp_milli_second: float,
+) -> float:
     return timestamp_milli_second / 1_000

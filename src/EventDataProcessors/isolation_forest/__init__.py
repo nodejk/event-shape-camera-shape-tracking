@@ -24,6 +24,10 @@ class DataProcessor(BaseDataProcessor):
         )
 
     def process_data(self, input_events: numpy.ndarray):
+
+        if self._isolation_forest is None:
+            raise Exception("Isolation forest not initialized.")
+
         event_fires: numpy.ndarray = copy.deepcopy(input_events[:, 3])
 
         input_events[:, 3] = 0

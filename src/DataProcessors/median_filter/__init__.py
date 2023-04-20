@@ -6,5 +6,5 @@ import scipy
 class DataProcessor(BaseDataProcessor):
     size: int
 
-    def process_data(self, input_image: numpy.array) -> numpy.ndarray:
+    def process_data(self, input_image: numpy.ndarray) -> numpy.ndarray:
         return scipy.ndimage.median_filter(input_image, self.size)

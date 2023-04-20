@@ -8,7 +8,7 @@ from stonesoup.types.sensordata import ImageFrame
 import typing
 import datetime
 import numpy
-from src.Utils.event import convert_image_to_event
+from src.Utils.EventsUtils import EventsUtils
 from stonesoup.types.detection import Detection
 
 
@@ -17,7 +17,7 @@ class DetectionStreamer(DetectionReader):
     frame_reader: FrameReader = Property(doc="Frame Reader")
 
     @BufferedGenerator.generator_method
-    def detections_gen(self) -> typing.Tuple[datetime.datetime, typing.Set[Detection]]:
+    def detections_gen(self) -> typing.Tuple[datetime.datetime, typing.Set[Detection]]:     # type: ignore
         model: GSCEventMOD = GSCEventMOD(**self.model_configuration.parameters)
 
         image_frame: ImageFrame
@@ -26,7 +26,7 @@ class DetectionStreamer(DetectionReader):
         bounding_boxes: typing.Set[Detection]
 
         for image_frame in self.frame_reader:
-            event: numpy.ndarray = convert_image_to_event(image_frame.pixels)
+            event: numpy.ndarray = EventsUtils.convert_image_to_event(image_frame.pixels)
 
             spectral_labels, bounding_boxes = model.cluster(event, image_frame)
 

@@ -8,11 +8,7 @@ class ClusteringModel(pydantic.BaseModel):
     model_name: str
 
     @abc.abstractmethod
-    def find_optimal_parameters(self, input: numpy.array) -> None:
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def cluster(self, **kwargs: typing.Any) -> numpy.array:
+    def find_optimal_parameters(self, **kwargs) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod

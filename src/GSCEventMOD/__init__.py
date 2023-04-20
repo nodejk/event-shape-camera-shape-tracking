@@ -24,8 +24,9 @@ from src.Models.DetectionStreamer import DetectionStreamer
 from src.DataProcessors import DataProcessorSteps
 from src.EventDataProcessors import EventDataProcessorSteps
 from src.DataTransformers import DataTransformerSteps
-from src.Utils.file import random_file_name_generator
-import matplotlib.pyplot as plt
+from src.Utils.FileUtils import FileUtils
+from src.Models.Draw import Draw
+from src.Models.DetectionMetaData import DetectionMetaData
 
 matplotlib.use("TkAgg")
 
@@ -48,6 +49,8 @@ class Pipeline:
     current_session_path: str
     model_output_path: str
 
+    saved_output_counter: int
+
     def __init__(self, configuration: Configuration) -> None:
         self.configuration = configuration
 
@@ -62,8 +65,7 @@ class Pipeline:
         if self.configuration.model_output.save:
             self.__create_new_session()
             self.__save_configuration()
-
-            print('sessionpath-->', self.current_session_path)
+            self.saved_output_counter = 0
 
         self.__init_pipeline()
 
@@ -79,7 +81,7 @@ class Pipeline:
                 raise Exception("Pipeline Type not found")
 
     def __create_new_session(self) -> None:
-        folder_name: str = random_file_name_generator()
+        folder_name: str = FileUtils.random_file_name_generator()
 
         session_path: str = os.path.join(
             self.get_session_parent_absolute_path, folder_name
@@ -89,7 +91,9 @@ class Pipeline:
             os.mkdir(session_path)
 
             self.current_session_path = session_path
-            self.model_output_path = os.path.join(self.current_session_path, self.model_output_folder)
+            self.model_output_path = os.path.join(
+                self.current_session_path, self.model_output_folder
+            )
 
             os.mkdir(self.model_output_path)
         else:
@@ -151,9 +155,7 @@ class Pipeline:
         detection_reader: DetectionStreamer = self.__get_detection_streamer()
 
         kalman_filter: KalmanFilter = KalmanFilter(detection_reader)
-        ax1 = pyplot.subplot(111)
-
-        first = True
+        pyplot.subplot(111)
 
         im1: typing.Any
 
@@ -162,27 +164,16 @@ class Pipeline:
             pixels = copy.deepcopy(frame.pixels)
             image = Image.fromarray(pixels)
 
-            image = self.draw_detections(image, detection_reader.detections)
+            image = Draw.draw_tracks(image, detec)
 
             if self.configuration.model_output.save:
-                file_name: str = random_file_name_generator()
-                image_path = os.path.join(self.model_output_path, file_name + '.jpg')
+                image_path = os.path.join(
+                    self.model_output_path, self.saved_output_counter.__str__() + ".jpg"
+                )
 
                 image.save(image_path)
 
-    def draw_detections(self, image, detections):
-        draw = ImageDraw.Draw(image)
-
-        for index, detection in enumerate(detections):
-            y0, x0, w, h = numpy.array(detection.state_vector).reshape(4)
-
-            x1, y1 = (x0 + h, y0 + w)
-
-            box1 = tuple([(x0, y0), (x1, y1)])
-
-            draw.rectangle(box1, outline="red", width=3)
-
-        return image
+                self.saved_output_counter += 1
 
     def __real_time(self) -> None:
         # streamer: DetectionStreamer = self.__get_video_streamer()
