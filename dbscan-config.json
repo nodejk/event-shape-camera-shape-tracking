@@ -1,17 +1,14 @@
 {
     "batch_size": 10,
     "epochs": 100,
-    "model": "GSCEventMOD",
+    "model": "DBScan",
     "pipeline_type": "step-prediction",
     "model_parameters": {
         "parameters": {
-            "min_num_clusters": 2,
-            "max_num_clusters": 6,
-            "num_neighbors": 30,
-            "num_clusters": 3,
-            "mode": "find-optimal-clusters",
-            "non_max_suppression": false,
-            "non_max_suppression_threshold": 0.1
+            "eps": 50,
+            "min_samples": 10,
+            "algorithm": "auto",
+            "metric": "euclidean"
         }
     },
     "events_input": {
@@ -21,7 +18,8 @@
         }
     },
     "model_output": {
-        "save": true
+        "save": true,
+        "display": true
     },
     "live_video_frame_reader_config": {
         "address": "127.0.0.1",

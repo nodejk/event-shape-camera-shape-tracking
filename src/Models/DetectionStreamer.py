@@ -1,6 +1,6 @@
 from stonesoup.detector.base import DetectionReader
 from stonesoup.buffered_generator import BufferedGenerator
-from src.GSCEventMOD.Models.GSCEventMOD import GSCEventMOD
+from src.Models.ClusteringModel import ClusteringModel
 from stonesoup.base import Property
 from src.Models.Configuration import ModelParametersConfig
 from stonesoup.reader.base import FrameReader
@@ -15,11 +15,10 @@ from stonesoup.types.detection import Detection
 class DetectionStreamer(DetectionReader):
     model_configuration: ModelParametersConfig = Property(doc="Model Configuration")
     frame_reader: FrameReader = Property(doc="Frame Reader")
+    model: ClusteringModel = Property(doc="Clustering Model")
 
     @BufferedGenerator.generator_method
-    def detections_gen(self) -> typing.Tuple[datetime.datetime, typing.Set[Detection]]:     # type: ignore
-        model: GSCEventMOD = GSCEventMOD(**self.model_configuration.parameters)
-
+    def detections_gen(self) -> typing.Tuple[datetime.datetime, typing.Set[Detection]]:  # type: ignore
         image_frame: ImageFrame
 
         spectral_labels: typing.List[numpy.ndarray]
@@ -28,6 +27,6 @@ class DetectionStreamer(DetectionReader):
         for image_frame in self.frame_reader:
             event: numpy.ndarray = EventsUtils.convert_image_to_event(image_frame.pixels)
 
-            spectral_labels, bounding_boxes = model.cluster(event, image_frame)
+            spectral_labels, bounding_boxes = self.model.cluster(event, image_frame)
 
             yield image_frame.timestamp, bounding_boxes

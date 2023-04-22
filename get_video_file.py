@@ -2,7 +2,7 @@ import cv2
 import os
 
 if __name__ == "__main__":
-    root_path = "/home/blackplague/PycharmProjects/event_shape_camera_shape_tracking/src/GSCEventMOD/Sessions/28f3ee4ca3/"
+    root_path = "/src/GSCEventMOD/Sessions/28f3ee4ca3/"
     image_folder = os.path.join(root_path, "model_output")
     video_name = os.path.join(root_path, "video.avi")
 

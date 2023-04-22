@@ -18,12 +18,8 @@ class LiveVideoStreamFrameReader(FrameReader):
     width: int
 
     data_processors_steps: DataProcessorSteps = Property(doc="DataProcessor Steps")
-    event_data_processors_steps: EventDataProcessorSteps = Property(
-        doc="Event Data Processors"
-    )
-    data_transformers_steps: DataTransformerSteps = Property(
-        doc="DataTransformers Steps"
-    )
+    event_data_processors_steps: EventDataProcessorSteps = Property(doc="Event Data Processors")
+    data_transformers_steps: DataTransformerSteps = Property(doc="DataTransformers Steps")
 
     @property
     def frame(self):
@@ -31,14 +27,10 @@ class LiveVideoStreamFrameReader(FrameReader):
 
     @BufferedGenerator.generator_method
     def frames_gen(self) -> ImageFrame:
-        with dv.NetworkNumpyEventPacketInput(
-            address=self.address, port=self.port
-        ) as stream:
+        with dv.NetworkNumpyEventPacketInput(address=self.address, port=self.port) as stream:
             input_events: numpy.ndarray = EventsUtils.convert_packets_to_events(stream)
 
-            processed_events: numpy.ndarray = self.event_data_processors_steps.run(
-                input_events
-            )
+            processed_events: numpy.ndarray = self.event_data_processors_steps.run(input_events)
 
             (image, timestamp) = EventsUtils.convert_event_frame_to_image(
                 processed_events,

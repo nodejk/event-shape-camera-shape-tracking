@@ -12,11 +12,8 @@ class Session:
             raise Exception("Configuration File Not Provided")
 
         with open(config_path) as file:
-            print("Loading the configuration...")
             json_configuration: dict[typing.Any, typing.Any] = json.loads(file.read())
 
             self.configuration = Configuration(**json_configuration)
 
-        importlib.import_module(f"src.{self.configuration.model}").Pipeline(
-            self.configuration
-        )
+        importlib.import_module(f"src.{self.configuration.model}").Pipeline(self.configuration)

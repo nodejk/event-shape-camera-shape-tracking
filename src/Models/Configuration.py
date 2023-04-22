@@ -53,6 +53,7 @@ class DetectionGSCEventStreamerConfig:
 @dataclass
 class ModelOutputConfig:
     save: bool
+    display: bool
 
 
 class Configuration(pydantic.BaseModel):

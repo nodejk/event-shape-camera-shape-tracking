@@ -1,0 +1,53 @@
+{
+    "batch_size": 10,
+    "epochs": 100,
+    "model": "GSCEventMOD",
+    "pipeline_type": "step-prediction",
+    "model_parameters": {
+        "parameters": {
+            "n_neighbors": 30,
+            "n_clusters": 3
+        }
+    },
+    "events_input": {
+        "source_type": "file",
+        "parameters": {
+            "file_path": "./Cars_sequence.aedat4"
+        }
+    },
+    "model_output": {
+        "save": true,
+        "display": true
+    },
+    "live_video_frame_reader_config": {
+        "address": "127.0.0.1",
+        "port": 8000,
+        "height": 300,
+        "width": 300
+    },
+    "visualize": true,
+    "data_processors": {
+        "steps": [
+            {
+                "name": "median_filter",
+                "parameters": {
+                    "size": 3
+                }
+            }
+        ]
+    },
+    "event_data_processors": {
+        "steps": [
+            {
+                "name": "isolation_forest",
+                "parameters": {
+                    "random_state": 0,
+                    "contamination": 0.3
+                }
+            }
+        ]
+    },
+    "data_transformers": {
+        "steps": []
+    }
+}

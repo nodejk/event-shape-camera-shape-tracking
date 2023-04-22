@@ -3,14 +3,16 @@ import pydantic
 import numpy
 import typing
 
+from stonesoup.types.sensordata import ImageFrame
+
 
 class ClusteringModel(pydantic.BaseModel):
     model_name: str
 
     @abc.abstractmethod
-    def find_optimal_parameters(self, **kwargs) -> None:
+    def load_from_snapshot(self, session_to_restore_from: str) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
-    def load_from_snapshot(self, session_to_restore_from: str) -> None:
+    def cluster(self, input_events: numpy.array, image_frame: ImageFrame) -> typing.Any:
         raise NotImplementedError

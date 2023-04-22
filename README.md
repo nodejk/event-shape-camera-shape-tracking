@@ -1,16 +1,14 @@
-# event-shape-camera-shape-tracking
+# Event Camera Shape Tracking
 
-# Development Guidelines:
-
-## Branch Naming Convention:
-It can be one of the following:
-
-Example: https://www.meistertask.com/app/task/task-id/task-name
-
-1. bugfix/task-id-task-name_a_short_description_of_task
-2. improvement/task-id-task-name_a_short_description_of_task
-3. feature/task-id-task-name_a_short_description_of_task
-4. new-algo/task-id-task-name_a_short_description_of_task
+## How to run pipeline:
 
 
-C:\Users\Krishna\event-camera
+---
+## Understanding Configuration
+
+The pipeline runs with the help of a validation config.json file as it allows to manipulate the pipeline
+accordingly by modifying the clustering model, data processors, data transformers, event data processors 
+and the input of the model.
+
+A sample config.json is provided in the repo to test out.
+

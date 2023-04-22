@@ -12,7 +12,7 @@ class EventsUtils:
 
         event = []
 
-        for iy, ix in numpy.ndindex(image.shape):   # type: ignore
+        for iy, ix in numpy.ndindex(image.shape):  # type: ignore
             if image[iy, ix] != 0:
                 event.append([iy, ix])
 
@@ -24,7 +24,6 @@ class EventsUtils:
     def convert_event_frame_to_image(
         event_frame: numpy.ndarray, height: int, width: int
     ) -> typing.Tuple[numpy.ndarray, datetime.datetime]:
-
         image: numpy.ndarray = numpy.full((height, width), 0).astype(numpy.uint8)
         timestamp: datetime.datetime = datetime.datetime.now()
 

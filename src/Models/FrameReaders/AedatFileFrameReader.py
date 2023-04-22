@@ -15,12 +15,8 @@ class AedatFileFrameReader(FrameReader):
     file_path: str = Property(doc="Path of the aedat file")
 
     data_processors_steps: DataProcessorSteps = Property(doc="DataProcessor Steps")
-    event_data_processors_steps: EventDataProcessorSteps = Property(
-        doc="Event Data Processors"
-    )
-    data_transformers_steps: DataTransformerSteps = Property(
-        doc="DataTransformers Steps"
-    )
+    event_data_processors_steps: EventDataProcessorSteps = Property(doc="Event Data Processors")
+    data_transformers_steps: DataTransformerSteps = Property(doc="DataTransformers Steps")
 
     @property
     def frame(self):
@@ -36,9 +32,7 @@ class AedatFileFrameReader(FrameReader):
 
                 processed_events = self.event_data_processors_steps.run(input_events)
 
-                (image, timestamp) = EventsUtils.convert_event_frame_to_image(
-                    processed_events, height, width
-                )
+                (image, timestamp) = EventsUtils.convert_event_frame_to_image(processed_events, height, width)
 
                 processed_image: numpy.ndarray = self.data_transformers_steps.run(image)
                 processed_image = self.data_processors_steps.run(processed_image)

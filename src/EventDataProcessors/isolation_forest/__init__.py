@@ -13,9 +13,7 @@ class DataProcessor(BaseDataProcessor):
     _isolation_forest: typing.Optional[IsolationForest] = None
 
     def __init__(self, **kwargs) -> None:
-        parent_attributes: typing.List[str] = [
-            attr for attr in super().__annotations__.keys()
-        ]
+        parent_attributes: typing.List[str] = [attr for attr in super().__annotations__.keys()]
 
         super().__init__(**kwargs)
 
@@ -24,7 +22,6 @@ class DataProcessor(BaseDataProcessor):
         )
 
     def process_data(self, input_events: numpy.ndarray):
-
         if self._isolation_forest is None:
             raise Exception("Isolation forest not initialized.")
 

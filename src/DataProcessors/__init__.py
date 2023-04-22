@@ -19,7 +19,6 @@ class DataProcessorSteps:
         data_processors: typing.List[BaseDataProcessor] = []
 
         for processor_config in configuration.data_processors.steps:
-            print("processor_config", processor_config.name)
             processor: BaseDataProcessor = importlib.import_module(
                 f"src.DataProcessors.{processor_config.name}"
             ).DataProcessor(
