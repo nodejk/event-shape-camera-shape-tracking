@@ -24,23 +24,23 @@ class KalmanFilter:
     tracker: MultiTargetTracker
 
     def __init__(self, detector: DetectionReader) -> None:
-        transition_model = CombinedLinearGaussianTransitionModel(KalmanFilter.get_transition_models())
+        transition_model: CombinedLinearGaussianTransitionModel = CombinedLinearGaussianTransitionModel(KalmanFilter.get_transition_models())
 
-        measurement_model = LinearGaussian(**KalmanFilter.get_measurement_model_properties())
+        measurement_model: LinearGaussian = LinearGaussian(**KalmanFilter.get_measurement_model_properties())
 
         predictor: KalmanPredictor = KalmanPredictor(transition_model)
         updater: KalmanUpdater = KalmanUpdater(measurement_model)
 
-        hypothesiser = DistanceHypothesiser(predictor, updater, Mahalanobis(), 10)
+        hypothesiser: DistanceHypothesiser = DistanceHypothesiser(predictor, updater, Mahalanobis(), 10)
 
         prior_state = GaussianState(
             StateVector(numpy.zeros((6, 1))),
             CovarianceMatrix(numpy.diag([100**2, 30**2, 100**2, 30**2, 100**2, 100**2])),
         )
 
-        deleter_init = UpdateTimeStepsDeleter(time_steps_since_update=5)
+        deleter_init: UpdateTimeStepsDeleter = UpdateTimeStepsDeleter(time_steps_since_update=5)
 
-        data_associator = GNNWith2DAssignment(hypothesiser)
+        data_associator: GNNWith2DAssignment = GNNWith2DAssignment(hypothesiser)
 
         initiator = MultiMeasurementInitiator(
             prior_state,
@@ -51,7 +51,7 @@ class KalmanFilter:
             min_points=2,
         )
 
-        deleter = UpdateTimeStepsDeleter(time_steps_since_update=3)
+        deleter: UpdateTimeStepsDeleter = UpdateTimeStepsDeleter(time_steps_since_update=3)
 
         self.tracker = MultiTargetTracker(
             initiator=initiator,
@@ -64,8 +64,8 @@ class KalmanFilter:
     @staticmethod
     def get_transition_models() -> typing.List[ConstantNthDerivative]:
         return [
-            ConstantVelocity(3**2),
-            ConstantVelocity(3**2),
+            ConstantVelocity(10**2),
+            ConstantVelocity(10**2),
             RandomWalk(3**2),
             RandomWalk(3**2),
         ]
