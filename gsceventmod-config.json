@@ -6,7 +6,7 @@
     "model_parameters": {
         "parameters": {
             "n_neighbors": 30,
-            "n_clusters": 3
+            "n_clusters": 2
         }
     },
     "events_input": {
@@ -16,7 +16,7 @@
         }
     },
     "model_output": {
-        "save": true,
+        "save": false,
         "display": true
     },
     "live_video_frame_reader_config": {

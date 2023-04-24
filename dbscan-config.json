@@ -18,7 +18,7 @@
         }
     },
     "model_output": {
-        "save": true,
+        "save": false,
         "display": true
     },
     "live_video_frame_reader_config": {

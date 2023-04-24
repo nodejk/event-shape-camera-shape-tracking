@@ -38,7 +38,7 @@ class KalmanFilter:
             CovarianceMatrix(numpy.diag([100**2, 30**2, 100**2, 30**2, 100**2, 100**2])),
         )
 
-        deleter_init: UpdateTimeStepsDeleter = UpdateTimeStepsDeleter(time_steps_since_update=5)
+        deleter_init: UpdateTimeStepsDeleter = UpdateTimeStepsDeleter(time_steps_since_update=3)
 
         data_associator: GNNWith2DAssignment = GNNWith2DAssignment(hypothesiser)
 

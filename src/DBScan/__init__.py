@@ -1,11 +1,8 @@
-import typing
 import os
 
 import numpy
 from matplotlib import pyplot
 import matplotlib
-import copy
-from PIL import Image
 import pathlib
 
 
@@ -16,7 +13,6 @@ from src.EventDataProcessors import EventDataProcessorSteps
 from src.DataTransformers import DataTransformerSteps
 from src.Models.DetectionStreamer import DetectionStreamer
 from stonesoup.reader.base import FrameReader
-from src.Enums.PipelineEnum import PipelineEnum
 from src.Enums.EventInputSourceType import EventInputSourceType
 from src.Models.FrameReaders.LiveVideoStreamFrameReader import (
     LiveVideoStreamFrameReader,
@@ -64,17 +60,6 @@ class Pipeline:
 
         self.__init_pipeline()
 
-    def __init_pipeline(self) -> None:
-        match self.configuration.pipeline_type:
-            case PipelineEnum.REAL_TIME.value:
-                return self.__real_time()
-            case PipelineEnum.STEP_PREDICTION.value:
-                return self.__step_prediction()
-            case PipelineEnum.FIND_OPTIMAL_PARAMETERS.value:
-                raise Exception("DBScan has no optimal params")
-            case _:
-                raise Exception("Pipeline Type not found")
-
     def __get_model(self) -> DBScan:
         return DBScan(
             model_name=self.configuration.model,
@@ -113,7 +98,7 @@ class Pipeline:
             self.model,
         )
 
-    def __step_prediction(self) -> None:
+    def __init_pipeline(self) -> None:
         kalman_filter: KalmanFilter = KalmanFilter(self.detection_streamer)
         pyplot.subplot(111)
 

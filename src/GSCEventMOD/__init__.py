@@ -1,16 +1,14 @@
-import typing
 import os
+
+import numpy
 from matplotlib import pyplot
 import matplotlib
-import copy
-from PIL import Image
 import pathlib
 
 
 from src.Models.Configuration import Configuration
 from src.GSCEventMOD.GSCEventMOD import GSCEventMOD
 from stonesoup.reader.base import FrameReader
-from src.Enums.PipelineEnum import PipelineEnum
 from src.Enums.EventInputSourceType import EventInputSourceType
 from src.Models.FrameReaders.AedatFileFrameReader import AedatFileFrameReader
 from src.Models.FrameReaders.LiveVideoStreamFrameReader import (
@@ -69,17 +67,6 @@ class Pipeline:
 
         self.__init_pipeline()
 
-    def __init_pipeline(self):
-        match self.configuration.pipeline_type:
-            case PipelineEnum.REAL_TIME.value:
-                return self.__real_time()
-            case PipelineEnum.STEP_PREDICTION.value:
-                return self.__step_prediction()
-            case PipelineEnum.FIND_OPTIMAL_PARAMETERS.value:
-                return self.__find_optimal_parameters()
-            case _:
-                raise Exception("Pipeline Type not found")
-
     def __save_configuration(self) -> None:
         configuration_path: str = os.path.join(self.current_session_path, "config.json")
 
@@ -89,9 +76,6 @@ class Pipeline:
     @property
     def get_model_absolute_path(self) -> str:
         return pathlib.Path(__file__).absolute().parent.__str__()
-
-    def __find_optimal_parameters(self) -> None:
-        return
 
     def __get_model(self) -> GSCEventMOD:
         return GSCEventMOD(
@@ -131,32 +115,17 @@ class Pipeline:
             self.model,
         )
 
-    def __step_prediction(self) -> None:
+    def __init_pipeline(self) -> None:
         kalman_filter: KalmanFilter = KalmanFilter(self.detection_streamer)
         pyplot.subplot(111)
 
-        for timestamp, detec in kalman_filter.tracker:
-            frame = self.frame_reader.frame
-            pixels = copy.deepcopy(frame.pixels)
-            image = Image.fromarray(pixels)
-
-            image = Draw.draw_tracks(image, detec)
+        for timestamp, tracks in kalman_filter.tracker:
+            image = Draw.draw_tracks(self.frame_reader.frame.pixels, tracks)
 
             if self.configuration.model_output.save:
-                image_path = os.path.join(
-                    self.model_output_path, self.saved_output_counter.__str__() + ".jpg"
-                )
-
-                image.save(image_path)
-
+                image_path = os.path.join(self.model_output_path, self.saved_output_counter.__str__() + ".jpg")
+                Draw.save_image(image_path, image)
                 self.saved_output_counter += 1
 
-    def __real_time(self) -> None:
-        # streamer: DetectionStreamer = self.__get_video_streamer()
-        #
-        # detector: KalmanFilter = KalmanFilter(streamer)
-        # tracker = detector.tracker
-        #
-        # for timestamp, detections in tracker:
-        #     print(detections)
-        pass
+            if self.configuration.model_output.display:
+                Visualizer.visualize(numpy.array(image), "model_output")

@@ -1,19 +1,36 @@
+import argparse
+import typing
+
 import cv2
 import os
+import glob
+
+
+def image_file_sort(s: str) -> int:
+    return int(os.path.basename(s)[:-4])
+
 
 if __name__ == "__main__":
-    root_path = "/src/GSCEventMOD/Sessions/28f3ee4ca3/"
-    image_folder = os.path.join(root_path, "model_output")
-    video_name = os.path.join(root_path, "video.avi")
 
-    images = [img for img in os.listdir(image_folder) if img.endswith(".jpg")]
-    frame = cv2.imread(os.path.join(image_folder, images[0]))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-s", "--session_path", help="path of configuration")
+    args = parser.parse_args()
+
+    output_dir: str = os.path.join(args.session_path, "model_output")
+
+    images: typing.List[str] = glob.glob(output_dir + "/*.jpg")
+
+    images.sort(key=image_file_sort)
+
+    video_name: str = "video.avi"
+
+    frame = cv2.imread(images[0])
     height, width, layers = frame.shape
 
-    video = cv2.VideoWriter(video_name, 0, 1, (width, height))
+    video = cv2.VideoWriter(video_name, 0, 30, (width, height))
 
     for image in images:
-        video.write(cv2.imread(os.path.join(image_folder, image)))
+        video.write(cv2.imread(image))
 
     cv2.destroyAllWindows()
     video.release()
