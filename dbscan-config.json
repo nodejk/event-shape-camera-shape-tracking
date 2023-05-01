@@ -1,8 +1,5 @@
 {
-    "batch_size": 10,
-    "epochs": 100,
     "model": "DBScan",
-    "pipeline_type": "step-prediction",
     "model_parameters": {
         "parameters": {
             "eps": 50,
@@ -21,13 +18,6 @@
         "save": false,
         "display": true
     },
-    "live_video_frame_reader_config": {
-        "address": "127.0.0.1",
-        "port": 8000,
-        "height": 300,
-        "width": 300
-    },
-    "visualize": true,
     "data_processors": {
         "steps": [
             {
