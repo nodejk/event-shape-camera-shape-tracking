@@ -58,11 +58,9 @@ class ModelOutputConfig:
 
 class Configuration(pydantic.BaseModel):
     model: str
-    pipeline_type: str
     events_input: EventInputConfig
     model_output: ModelOutputConfig
     detection_gsc_event_reader_config: typing.Optional[DetectionGSCEventStreamerConfig]
-    visualize: bool
     model_parameters: ModelParametersConfig
     data_processors: DataProcessorConfig
     event_data_processors: DataProcessorConfig
