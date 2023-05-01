@@ -43,10 +43,11 @@ class DBScan(ClusteringModel):
     def cluster(
         self, input_events: numpy.array, image_frame: ImageFrame
     ) -> typing.Tuple[typing.List[numpy.ndarray], typing.Set[Detection]]:
-        return self.__cluster(input_events, image_frame)
+        return DBScan.__cluster(input_events, image_frame)
 
+    @staticmethod
     def __cluster(
-        self, input_events: numpy.array, image_frame: ImageFrame
+        input_events: numpy.array, image_frame: ImageFrame
     ) -> typing.Tuple[typing.List[numpy.ndarray], typing.Set[Detection]]:
         input_image: numpy.ndarray = image_frame.pixels
         image_height, image_width = input_image.shape[0], input_image.shape[1]
