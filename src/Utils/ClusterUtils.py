@@ -48,9 +48,6 @@ class ClusterUtils:
             detection: Detection = Detection(
                 [slice_x.start, slice_y.start, width, height],
                 timestamp=image_frame.timestamp,
-                metadata={
-                    "object_id": label,
-                },
             )
 
             detections.add(detection)
