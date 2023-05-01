@@ -1,8 +1,6 @@
 from src.Models.ClusteringModel import ClusteringModel
-from sklearn.metrics import silhouette_score
 from sklearn.cluster import SpectralClustering
 import numpy
-from scipy import ndimage
 from stonesoup.types.sensordata import ImageFrame
 import typing
 from stonesoup.types.detection import Detection
@@ -26,6 +24,7 @@ class GSCEventMOD(ClusteringModel):
     ) -> typing.Tuple[typing.List[numpy.ndarray], typing.Set[Detection]]:
         return self.__cluster(input_events, image_frame)
 
+    @staticmethod
     def spectral_clustering(
         num_clusters: int,
         num_neighbors: int,
@@ -42,6 +41,17 @@ class GSCEventMOD(ClusteringModel):
     def __cluster(
         self, input_events: numpy.array, image_frame: ImageFrame
     ) -> typing.Tuple[typing.List[numpy.ndarray], typing.Set[Detection]]:
+        """
+        method for converting input_events and image_frame into bounding boxes.
+        Parameters
+        ----------
+        input_events: numpy array of events in [x(1), y(1), ... , x(i), y(i)] format.
+        image_frame: events in form of an image.
+
+        Returns tuple of (list(bounding_box), set(Detection)); bounding_box: image of boxes.
+        -------
+
+        """
         input_image: numpy.ndarray = image_frame.pixels
         image_height, image_width = input_image.shape[0], input_image.shape[1]
 
@@ -62,34 +72,4 @@ class GSCEventMOD(ClusteringModel):
             input_events, spectral_labels, image_height, image_width
         )
 
-        return self.__retrieve_bounding_boxes(output_labels, image_frame)
-
-    def calculate_silhouette_score(self, data: numpy.ndarray, clustering: numpy.ndarray) -> float:
-        return silhouette_score(data, clustering)
-
-    def __retrieve_bounding_boxes(
-        self, output_labels: numpy.ndarray, image_frame: ImageFrame
-    ) -> typing.Tuple[typing.List[numpy.ndarray], typing.Set[Detection]]:
-        detections: typing.Set[Detection] = set()
-        bounding_boxes: typing.List[numpy.ndarray] = []
-
-        for label in range(self.n_clusters):
-            slice_x, slice_y = ndimage.find_objects(output_labels == label)[0]
-
-            width: int = slice_x.stop - slice_x.start
-            height: int = slice_y.stop - slice_y.start
-
-            roi = image_frame.pixels[slice_x, slice_y]
-
-            bounding_boxes.append(roi)
-            detection: Detection = Detection(
-                [slice_x.start, slice_y.start, width, height],
-                timestamp=image_frame.timestamp,
-                metadata={
-                    "object_id": label,
-                },
-            )
-
-            detections.add(detection)
-
-        return bounding_boxes, detections
+        return ClusterUtils.retrieve_bounding_boxes(self.n_clusters, output_labels, image_frame)
