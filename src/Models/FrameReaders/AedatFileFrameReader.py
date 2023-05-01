@@ -34,8 +34,8 @@ class AedatFileFrameReader(FrameReader):
 
                 (image, timestamp) = EventsUtils.convert_event_frame_to_image(processed_events, height, width)
 
-                processed_image: numpy.ndarray = self.data_transformers_steps.run(image)
-                processed_image = self.data_processors_steps.run(processed_image)
+                processed_image: numpy.ndarray = self.data_processors_steps.run(image)
+                processed_image = self.data_transformers_steps.run(processed_image)
 
                 yield ImageFrame(processed_image, timestamp)
 
