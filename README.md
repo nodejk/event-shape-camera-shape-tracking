@@ -2,6 +2,8 @@
 
 ## How to run the pipeline:
 
+Note: You have to create a Sessions folder under DBSCAN and GSCEventMOD in order to save the pipeline output.
+
 1. Run the following command in the CLI to run GSC event mod configuration:
 
 ```bash
